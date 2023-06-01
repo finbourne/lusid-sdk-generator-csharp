@@ -1,0 +1,75 @@
+{
+  "packageName": "${PACKAGE_NAME}",
+  "projectName": "${PROJECT_NAME}",
+  "packageVersion": "${PACKAGE_VERSION}",
+  "packageGuid": "B7B63DA8-4A51-45B1-A389-B1427246E439",
+  "library": "httpclient",
+  "sourceFolder": ".",
+  "targetFramework": "netstandard2.1",
+  "useDateTimeOffset": true,
+  "netCoreProjectFile": true,
+  "returnICollection": true,
+  "licenseInfo": "MIT",
+  "disallowAdditionalPropertiesIfNotPresent": "true",
+  "caseInsensitiveResponseHeaders": true,
+  "packageTags": "FINBOURNE, LUSID, SDK",
+  "excludeTests": true,
+  "files": {
+    "other/ApiConfiguration.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiConfiguration.cs"
+    },
+    "other/ApiConfigurationBuilder.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiConfigurationBuilder.cs"
+    },
+    "other/ApiExceptionExtensions.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiExceptionExtensions.cs"
+    },
+    "other/ApiFactory.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiFactory.cs"
+    },
+    "other/ApiFactoryBuilder.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiFactoryBuilder.cs"
+    },
+    "other/ApiResponseExtensions.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ApiResponseExtensions.cs"
+    },
+    "other/ClientCredentialsFlowTokenProvider.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ClientCredentialsFlowTokenProvider.cs"
+    },
+    "other/DateTimeOrCutLabel.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "DateTimeOrCutLabel.cs"
+    },
+    "other/ExceptionHandler.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "ExceptionHandler.cs"
+    },
+    "other/MissingConfigException.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "MissingConfigException.cs"
+    },
+    "other/PersonalAccessTokenProvider.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "PersonalAccessTokenProvider.cs"
+    },
+    "other/PollyApiRetryHandler.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "PollyApiRetryHandler.cs"
+    },
+    "other/PropertyBasedConverter.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "PropertyBasedConverter.cs"
+    },
+    "other/TokenProviderConfiguration.mustache": {
+      "folder": "Lusid.Sdk/Extensions",
+      "destinationFilename": "TokenProviderConfiguration.cs"
+    }
+  }
+}
