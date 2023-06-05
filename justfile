@@ -1,8 +1,9 @@
-export PACKAGE_NAME := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
-export PROJECT_NAME := `echo ${PROJECT_NAME:-Lusid.Sdk}`
-export PACKAGE_VERSION := `echo ${PACKAGE_VERSION:-2.0.0}`
-
-export NUGET_PACKAGE_LOCATION := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
+export PACKAGE_NAME               := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
+export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
+export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.0.0}`
+export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
+export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
+export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
 
 swagger_path := "./swagger.json"
 
@@ -13,8 +14,8 @@ get-swagger:
     curl -s {{swagger_url}} > swagger.json
 
 build-docker-images: 
-    docker build -t lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK -f Dockerfile generate
-    docker build -t lusid-sdk-pub-csharp:latest -f publish/Dockerfile publish
+    docker build --platform linux/amd64 -t finbourne/lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK -f Dockerfile generate
+    docker build --platform linux/amd64 -t finbourne/lusid-sdk-pub-csharp:latest -f publish/Dockerfile publish
 
 generate-local:
     mkdir -p /tmp/${PROJECT_NAME}_${PACKAGE_VERSION}
@@ -33,6 +34,20 @@ generate-local:
 generate TARGET_DIR:
     @just generate-local
     
+    # need to remove the created content before copying over the top of it.
+    # this prevents deleted content from hanging around indefinitely.
+    rm -rf {{TARGET_DIR}}/sdk/lusid
+    rm -rf {{TARGET_DIR}}/sdk/docs
+    
+    mv -R generate/.output/* {{TARGET_DIR}}
+
+generate-cicd TARGET_DIR:
+    mkdir -p /tmp/${PROJECT_NAME}_${PACKAGE_VERSION}
+    envsubst < generate/config-template.json > generate/.config.json
+    cp ./generate/.openapi-generator-ignore ./generate/.output/.openapi-generator-ignore
+
+    ./generate/generate.sh ./generate ./generate/.output /tmp/swagger.json .config.json
+
     # need to remove the created content before copying over the top of it.
     # this prevents deleted content from hanging around indefinitely.
     rm -rf {{TARGET_DIR}}/sdk/lusid

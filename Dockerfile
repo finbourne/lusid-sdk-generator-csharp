@@ -10,8 +10,6 @@ COPY --from=rust /usr/local/cargo/bin/just /usr/bin/just
 RUN mkdir -p /usr/src/
 WORKDIR /usr/src/
 
-ENTRYPOINT [ "/bin/bash" ]
-
 # Make ssh dir
 # Create known_hosts
 # Add github key
@@ -22,3 +20,5 @@ RUN mkdir /root/.ssh/ \
 RUN --mount=type=ssh \
     git clone git@github.com:finbourne/lusid-sdk-doc-templates.git /tmp/docs \
     && git clone git@github.com:finbourne/lusid-sdk-workflow-template.git /tmp/workflows
+
+CMD [ "/bin/bash" ]

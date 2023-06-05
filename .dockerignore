@@ -1,0 +1,7 @@
+Dockerfile*
+/*.json
+.github/
+docker-compose.yaml
+docker-compose.yml
+.*
+!.openapi-generator-ignore

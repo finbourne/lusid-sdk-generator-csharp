@@ -6,6 +6,7 @@
 !.openapi-generator-ignore
 !.gitignore
 !.github
+!.dockerignore
 
 # ignore any swagger.json file that ends up in here
 swagger.json
