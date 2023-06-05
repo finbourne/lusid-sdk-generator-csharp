@@ -17,5 +17,6 @@ WORKDIR /usr/src/
 COPY docs/. /tmp/docs/
 COPY workflows/. /tmp/workflows/
 COPY generate/ /usr/src/generate
+COPY ./justfile /usr/src/justfile
 
 CMD [ "/bin/bash" ]
