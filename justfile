@@ -1,3 +1,13 @@
+# Generate SDK's from a swagger.json file.
+#
+#  Ensure that you set the following environment variables to an appropriate value before running
+#    PACKAGE_NAME
+#    PROJECT_NAME
+#    PACKAGE_VERSION
+#    APPLICATION_NAME
+#    META_REQUEST_ID_HEADER_KEY
+#    NUGET_PACKAGE_LOCATION
+
 export PACKAGE_NAME               := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
 export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
 export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.0.0}`
@@ -18,7 +28,6 @@ build-docker-images:
     docker build --platform linux/amd64 -t finbourne/lusid-sdk-pub-csharp:latest -f publish/Dockerfile publish
 
 generate-local:
-    mkdir -p /tmp/${PROJECT_NAME}_${PACKAGE_VERSION}
     envsubst < generate/config-template.json > generate/.config.json
     docker run \
         -e JAVA_OPTS="-Dlog.level=error" \
@@ -41,19 +50,22 @@ generate TARGET_DIR:
     
     mv -R generate/.output/* {{TARGET_DIR}}
 
+# Generate an SDK from a swagger.json and copy the output to the TARGET_DIR
 generate-cicd TARGET_DIR:
     mkdir -p /tmp/${PROJECT_NAME}_${PACKAGE_VERSION}
+    mkdir -p ./generate/.output
     envsubst < generate/config-template.json > generate/.config.json
     cp ./generate/.openapi-generator-ignore ./generate/.output/.openapi-generator-ignore
 
     ./generate/generate.sh ./generate ./generate/.output /tmp/swagger.json .config.json
+    rm -f generate/.output/.openapi-generator-ignore
 
     # need to remove the created content before copying over the top of it.
     # this prevents deleted content from hanging around indefinitely.
     rm -rf {{TARGET_DIR}}/sdk/lusid
     rm -rf {{TARGET_DIR}}/sdk/docs
     
-    mv -R generate/.output/* {{TARGET_DIR}}
+    cp -R generate/.output/. {{TARGET_DIR}}
 
 publish-only-local:
     docker run \
