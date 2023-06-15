@@ -2,7 +2,7 @@ FROM rust:slim-buster as rust
 
 RUN cargo install just
 
-FROM openapitools/openapi-generator-cli:latest as maven
+FROM openapitools/openapi-generator-cli:latest-release as maven
 
 RUN apt update && apt -y install jq git gettext-base
 COPY --from=rust /usr/local/cargo/bin/just /usr/bin/just
