@@ -167,7 +167,7 @@ namespace {{packageName}}.Extensions
             double secondsInterval = 0;
             if (retryAfterHeader != null)
             {
-                var value = retryAfterHeader.Value.Value?.ToString();
+                var value = retryAfterHeader.Value.Value?.FirstOrDefault();
                 double.TryParse(value, out secondsInterval);
             }
 
