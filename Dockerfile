@@ -2,9 +2,16 @@ FROM rust:latest as rust
 
 RUN cargo install just
 
-FROM openapitools/openapi-generator-cli:latest as maven
+FROM openapitools/openapi-generator-cli:latest-release as maven
 
-RUN apt update && apt -y install jq git
+RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh \
+    && chmod +x ./dotnet-install.sh \
+    && ./dotnet-install.sh --channel 6.0
+RUN apt update && apt -y install jq git gettext-base libicu-dev
+ENV DOTNET_ROOT=/root/.dotnet
+ENV PATH=$PATH:/root/.dotnet:/root/.dotnet/tools
+ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
+RUN dotnet dev-certs https --trust
 COPY --from=rust /usr/local/cargo/bin/just /usr/bin/just
 
 RUN mkdir -p /usr/src/
@@ -21,4 +28,3 @@ RUN --mount=type=ssh \
     git clone git@github.com:finbourne/lusid-sdk-doc-templates.git /tmp/docs \
     && git clone git@github.com:finbourne/lusid-sdk-workflow-template.git /tmp/workflows
 
-CMD [ "/bin/bash" ]

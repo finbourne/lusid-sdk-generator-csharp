@@ -80,8 +80,8 @@ namespace {{packageName}}.Client
 
         public async Task<T> Deserialize<T>(HttpResponseMessage response)
         {
-            var result = (T) await Deserialize(response, typeof(T)).ConfigureAwait(false);
-            return result;
+            var result = await Deserialize(response, typeof(T)).ConfigureAwait(false) ?? default(T);
+            return (T)result;
         }
 
         /// <summary>
@@ -92,6 +92,8 @@ namespace {{packageName}}.Client
         /// <returns>Object representation of the JSON string.</returns>
         internal async Task<object> Deserialize(HttpResponseMessage response, Type type)
         {
+            if (response.Content == null) return null;
+            
             IList<string> headers = response.Headers.Select(x => x.Key + "=" + x.Value).ToList();
 
             if (type == typeof(byte[])) // return byte array
@@ -387,7 +389,7 @@ namespace {{packageName}}.Client
                             options.HeaderParameters["Content-Type"][0];
 
                         var bytes = options.Data;
-                        request.Properties.Add(localContentType, bytes);
+                        request.Options.Set (new HttpRequestOptionsKey<Object>(localContentType), bytes);
                     }
                     else
                     {
@@ -401,7 +403,7 @@ namespace {{packageName}}.Client
             // TODO provide an alternative that allows cookies per request instead of per API client
             if (options.Cookies != null && options.Cookies.Count > 0)
             {
-                request.Properties["CookieContainer"] = options.Cookies;
+                request.Options.Set (new HttpRequestOptionsKey<List<Cookie>>("CookieContainer"), options.Cookies);
             }
 
             return request;
@@ -413,7 +415,10 @@ namespace {{packageName}}.Client
         private async Task<ApiResponse<T>> ToApiResponse<T>(HttpResponseMessage response, object responseData, Uri uri)
         {
             T result = (T) responseData;
-            string rawContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+            string rawContent = response.Content != null
+                ? await response.Content.ReadAsStringAsync().ConfigureAwait(false)
+                : string.Empty;
 
             var transformed = new ApiResponse<T>(response.StatusCode, new Multimap<string, string>({{#caseInsensitiveResponseHeaders}}StringComparer.OrdinalIgnoreCase{{/caseInsensitiveResponseHeaders}}), result, rawContent)
             {
@@ -431,7 +436,7 @@ namespace {{packageName}}.Client
             }
 
             // process response content headers, e.g. Content-Type
-            if (response.Content.Headers != null)
+            if (response.Content?.Headers != null)
             {
                 foreach (var responseHeader in response.Content.Headers)
                 {
@@ -491,8 +496,7 @@ namespace {{packageName}}.Client
                 Func<HttpRequestMessage> request = () =>
                 {
                     var innerRequest = req();
-                    var cookieContainer = innerRequest.Properties.ContainsKey("CookieContainer") ? innerRequest.Properties["CookieContainer"] as List<Cookie> : null;
-
+                    innerRequest.Options.TryGetValue(new HttpRequestOptionsKey<List<Cookie>>("CookieContainer"), out var cookieContainer);
                     if (cookieContainer != null)
                     {
                         if(_httpClientHandler == null) throw new InvalidOperationException("Request property `CookieContainer` not supported when the client is explicitly created without an HttpClientHandler, use the proper constructor.");
@@ -517,7 +521,7 @@ namespace {{packageName}}.Client
                     response = (policyResult.Outcome == OutcomeType.Successful) ?
                         policyResult.Result : new HttpResponseMessage()
                         {
-                            ReasonPhrase = policyResult.FinalException.ToString(),
+                            ReasonPhrase = policyResult.FinalException?.ToString() ?? string.Empty,
                             RequestMessage = policyResult.FinalHandledResult.RequestMessage
                         };
                 }

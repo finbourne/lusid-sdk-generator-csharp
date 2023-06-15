@@ -71,7 +71,8 @@ java ${JAVA_OPTS} -jar /opt/openapi-generator/modules/openapi-generator-cli/targ
     -t $gen_root/templates \
     --additional-properties=application=${APPLICATION_NAME},meta_request_id_header_key=${META_REQUEST_ID_HEADER_KEY} \
 	--type-mappings dateorcutlabel=DateTimeOrCutLabel \
-    --type-mappings double=decimal
+    --type-mappings double=decimal \
+    --git-repo-id=${GIT_REPO_NAME}
 
 rm -rf $sdk_output_folder/.openapi-generator
 rm -f $sdk_output_folder/.openapi-generator-ignore
