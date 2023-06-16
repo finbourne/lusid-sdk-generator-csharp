@@ -91,6 +91,13 @@ publish-cicd SRC_DIR:
             --source ${REPO_URL} \
             --api-key ${API_KEY} \;
 
+publish-to SRC_DIR OUT_DIR:
+    echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
+    cd {{SRC_DIR}}
+    dotnet dev-certs https --trust
+    dotnet pack -c Release {{SRC_DIR}}
+    find {{SRC_DIR}} -name "*.nupkg" -type f -exec cp {} {{OUT_DIR}} \;
+
 generate-and-publish TARGET_DIR:
     @just generate {{TARGET_DIR}}
     @just publish-only
@@ -103,5 +110,3 @@ generate-and-publish-cicd OUT_DIR:
     @just generate-cicd {{OUT_DIR}}
     @just publish-cicd {{OUT_DIR}}
 
-test:
-    ./test/test.sh
