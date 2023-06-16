@@ -79,11 +79,12 @@ publish-only:
     docker run \
         -e PACKAGE_VERSION=${PACKAGE_VERSION} \
         -v $(pwd)/generate/.output:/usr/src/ \
-        finbourne/lusid-sdk-gen-csharp:latest -- bash -c "cd /usr/src/sdk; dotnet pack -c Release; find . -name \"*.nupkg\" -exec dotnet publish {} \;"
+        finbourne/lusid-sdk-gen-csharp:latest -- bash -c "cd /usr/src/sdk; dotnet dev-certs https --trust; dotnet pack -c Release; find . -name \"*.nupkg\" -exec dotnet publish {} \;"
 
 publish-cicd SRC_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
     cd {{SRC_DIR}}
+    dotnet dev-certs https --trust
     dotnet pack -c Release {{SRC_DIR}}
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec \
         dotnet nuget push {} \

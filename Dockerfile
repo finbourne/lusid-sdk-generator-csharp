@@ -11,7 +11,6 @@ RUN apt update && apt -y install jq git gettext-base libicu-dev
 ENV DOTNET_ROOT=/root/.dotnet
 ENV PATH=$PATH:/root/.dotnet:/root/.dotnet/tools
 ENV DOTNET_CLI_TELEMETRY_OPTOUT=1
-RUN dotnet dev-certs https --trust
 COPY --from=rust /usr/local/cargo/bin/just /usr/bin/just
 
 RUN mkdir -p /usr/src/
