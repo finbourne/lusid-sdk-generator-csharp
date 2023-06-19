@@ -4,7 +4,7 @@ RUN cargo install just
 
 FROM openapitools/openapi-generator-cli:latest-release as maven
 
-RUN apt update && apt -y install jq git gettext-base
+RUN apt update && apt -y install jq git gettext-base libicu-dev
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh \
     && chmod +x ./dotnet-install.sh \
     && ./dotnet-install.sh --channel 6.0
