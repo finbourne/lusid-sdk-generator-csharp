@@ -59,7 +59,7 @@ generate-cicd TARGET_DIR:
     envsubst < generate/config-template.json > generate/.config.json
     cp ./generate/.openapi-generator-ignore ./generate/.output/.openapi-generator-ignore
 
-    ./generate/generate.sh ./generate ./generate/.output {{swagger_file}} .config.json
+    ./generate/generate.sh ./generate ./generate/.output {{swagger_path}} .config.json
     rm -f generate/.output/.openapi-generator-ignore
 
     # need to remove the created content before copying over the top of it.
