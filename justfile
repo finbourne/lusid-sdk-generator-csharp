@@ -87,7 +87,9 @@ publish-only:
 
 publish-cicd SRC_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
+    set +e
     dotnet dev-certs https --trust
+    set -e
     dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec \
         dotnet nuget push {} \
@@ -96,7 +98,9 @@ publish-cicd SRC_DIR:
 
 publish-to SRC_DIR OUT_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
+    set +e
     dotnet dev-certs https --trust
+    set  -e
     dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}/sdk
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec cp {} {{OUT_DIR}} \;
 
