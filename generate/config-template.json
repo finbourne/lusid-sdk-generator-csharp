@@ -1,7 +1,7 @@
 {
   "packageName": "${PACKAGE_NAME}",
   "projectName": "${PROJECT_NAME}",
-  "packageVersion": "${PACKAGE_VERSION}",
+  "packageVersion": "${ASSEMBLY_VERSION}",
   "packageAuthors": "FINBOURNE Technology Ltd",
   "packageCompany": "FINBOURNE Technology Ltd",
   "packageCopyright": "FINBOURNE Technology Ltd",

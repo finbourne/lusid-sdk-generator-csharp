@@ -3,6 +3,7 @@
 #  Ensure that you set the following environment variables to an appropriate value before running
 #    PACKAGE_NAME
 #    PROJECT_NAME
+#    ASSEMBLY_VERSION
 #    PACKAGE_VERSION
 #    APPLICATION_NAME
 #    META_REQUEST_ID_HEADER_KEY
@@ -10,7 +11,8 @@
 
 export PACKAGE_NAME               := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
 export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
-export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.0.0}`
+export ASSEMBLY_VERSION           := `echo ${ASSEMBLY_VERSION:-2.0.0}`
+export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.9999.0-alpha.nupkg}`
 export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
 export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
@@ -24,7 +26,7 @@ get-swagger:
     curl -s {{swagger_url}} > swagger.json
 
 build-docker-images: 
-    docker build -t finbourne/lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK -f Dockerfile generate
+    docker build -t finbourne/lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK -f Dockerfile .
 
 generate-local:
     envsubst < generate/config-template.json > generate/.config.json
@@ -32,7 +34,7 @@ generate-local:
         -e JAVA_OPTS="-Dlog.level=error" \
         -e APPLICATION_NAME=${APPLICATION_NAME} \
         -e META_REQUEST_ID_HEADER_KEY=${META_REQUEST_ID_HEADER_KEY} \
-        -e PACKAGE_VERSION=${PACKAGE_VERSION} \
+        -e ASSEMBLY_VERSION=${ASSEMBLY_VERSION} \
         -e GIT_REPO_NAME=${GIT_REPO_NAME} \
         -v $(pwd)/generate/:/usr/src/generate/ \
         -v $(pwd)/generate/.openapi-generator-ignore:/usr/src/generate/.output/.openapi-generator-ignore \
@@ -52,7 +54,7 @@ generate TARGET_DIR:
 
 # Generate an SDK from a swagger.json and copy the output to the TARGET_DIR
 generate-cicd TARGET_DIR:
-    mkdir -p /tmp/${PROJECT_NAME}_${PACKAGE_VERSION}
+    mkdir -p {{TARGET_DIR}}
     mkdir -p ./generate/.output
     envsubst < generate/config-template.json > generate/.config.json
     cp ./generate/.openapi-generator-ignore ./generate/.output/.openapi-generator-ignore
@@ -66,6 +68,8 @@ generate-cicd TARGET_DIR:
     rm -rf {{TARGET_DIR}}/sdk/docs
     
     cp -R generate/.output/. {{TARGET_DIR}}
+    echo "copied output to {{TARGET_DIR}}"
+    ls {{TARGET_DIR}}
 
 publish-only-local:
     docker run \
@@ -83,9 +87,8 @@ publish-only:
 
 publish-cicd SRC_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
-    cd {{SRC_DIR}}
     dotnet dev-certs https --trust
-    dotnet pack -c Release {{SRC_DIR}}
+    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec \
         dotnet nuget push {} \
             --source ${REPO_URL} \
@@ -93,9 +96,8 @@ publish-cicd SRC_DIR:
 
 publish-to SRC_DIR OUT_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
-    cd {{SRC_DIR}}
     dotnet dev-certs https --trust
-    dotnet pack -c Release {{SRC_DIR}}
+    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}/sdk
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec cp {} {{OUT_DIR}} \;
 
 generate-and-publish TARGET_DIR:

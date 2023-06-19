@@ -1,4 +1,4 @@
-FROM rust:latest as rust
+FROM rust:slim-buster as rust
 
 RUN cargo install just
 
@@ -27,3 +27,5 @@ RUN --mount=type=ssh \
     git clone git@github.com:finbourne/lusid-sdk-doc-templates.git /tmp/docs \
     && git clone git@github.com:finbourne/lusid-sdk-workflow-template.git /tmp/workflows
 
+COPY generate/ /usr/src/generate
+COPY ./justfile /usr/src/
