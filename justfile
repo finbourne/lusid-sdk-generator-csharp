@@ -90,7 +90,7 @@ publish-cicd SRC_DIR:
     set +e
     dotnet dev-certs https --trust
     set -e
-    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}
+    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} /p:PackageId=${PACKAGE_NAME} {{SRC_DIR}}
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec \
         dotnet nuget push {} \
             --source ${REPO_URL} \
@@ -101,7 +101,7 @@ publish-to SRC_DIR OUT_DIR:
     set +e
     dotnet dev-certs https --trust
     set  -e
-    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} {{SRC_DIR}}/sdk
+    dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} /p:PackageId=${PACKAGE_NAME} {{SRC_DIR}}/sdk
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec cp {} {{OUT_DIR}} \;
 
 generate-and-publish TARGET_DIR:
