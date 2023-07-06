@@ -2,7 +2,7 @@ FROM rust:slim-buster as rust
 
 RUN cargo install just
 
-FROM openapitools/openapi-generator-cli:latest-release as maven
+FROM openapitools/openapi-generator-cli:v6.6.0 as maven
 
 RUN apt update && apt -y install jq git gettext-base libicu-dev
 RUN wget https://dot.net/v1/dotnet-install.sh -O dotnet-install.sh \
