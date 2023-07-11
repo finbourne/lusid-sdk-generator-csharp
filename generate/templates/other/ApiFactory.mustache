@@ -114,7 +114,7 @@ namespace {{packageName}}.Extensions
             var dict = new Dictionary<Type, IApiAccessor>();
             foreach (Type api in ApiTypes)
             {
-                {{! var handler = new SocketsHttpHandler();
+                var handler = new SocketsHttpHandler();
                 handler.ConnectCallback = async (ctx, ct) =>
                 {
                     var s = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
@@ -137,11 +137,11 @@ namespace {{packageName}}.Extensions
                         s.Dispose();
                         throw;
                     }
-                }; }}
+                };
 
                 // Create an HttpClient object
-                {{! var client = new HttpClient(handler); }}
-                var client = new HttpClient();
+                var client = new HttpClient(handler);
+                {{! var client = new HttpClient(); }}
                 
                 if (!(Activator.CreateInstance(api, client, configuration, null) is IApiAccessor impl))
                 {
