@@ -75,7 +75,7 @@ publish-only-local:
     docker run \
         -e PACKAGE_VERSION=${PACKAGE_VERSION} \
         -v $(pwd)/generate/.output:/usr/src/ \
-        finbourne/lusid-sdk-gen-csharp:latest -- bash -c "cd /usr/src/sdk; dotnet pack -c Release"
+        finbourne/lusid-sdk-gen-csharp:latest -- bash -c "cd /usr/src/sdk; dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} /p:PackageId=${PACKAGE_NAME} "
     mkdir -p ${NUGET_PACKAGE_LOCATION}
     find . -name "*.nupkg" -exec cp {} ${NUGET_PACKAGE_LOCATION} \;
 
