@@ -111,7 +111,7 @@ namespace {{packageName}}.Extensions
             RetryConfiguration.AsyncRetryPolicy =
                 RetryConfiguration.AsyncRetryPolicy ?? PollyApiRetryHandler.DefaultRetryPolicyWithFallbackAsync;
 
-            {{! var handler = new SocketsHttpHandler();
+            var handler = new SocketsHttpHandler();
             handler.ConnectCallback = async (ctx, ct) =>
             {
                 var s = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
@@ -133,9 +133,15 @@ namespace {{packageName}}.Extensions
                 catch
                 {
                     s.Dispose();
+
+                    if (Environment.GetEnvironmentVariable("SDK_LOGGING") != null)
+                    {
+                        Console.WriteLine($"Socket Callback error - rethrowing: {e}");
+                    }
+
                     throw;
                 }
-            }; }}
+            };
 
             // Create an HttpClient object to be used in the instance creation.
             var client = new HttpClient();
