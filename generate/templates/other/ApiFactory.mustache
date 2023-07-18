@@ -130,7 +130,7 @@ namespace {{packageName}}.Extensions
                     await s.ConnectAsync(endpoint, ct);
                     return new NetworkStream(s, ownsSocket: true); 
                 }
-                catch
+                catch(Exception e)
                 {
                     s.Dispose();
 
