@@ -145,6 +145,9 @@ namespace {{packageName}}.Extensions
 
             // Create an HttpClient object to be used in the instance creation.
             var client = new HttpClient();
+            client.DefaultRequestVersion = HttpVersion.Version20;
+            client.Timeout = TimeSpan.FromMinutes(60);
+            client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
 
             var dict = new Dictionary<Type, IApiAccessor>();
             foreach (Type api in ApiTypes)
