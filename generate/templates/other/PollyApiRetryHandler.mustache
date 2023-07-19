@@ -50,11 +50,6 @@ namespace {{packageName}}.Extensions
 
         private static void HandleRetryAction(DelegateResult<HttpResponseMessage> result, int retryCount, Context ctx)
         {
-            // Add logging or other logic here 
-            if (Environment.GetEnvironmentVariable("SDK_LOGGING") != null)
-            {
-                Console.WriteLine("RETRY action: {1} for {0}", ctx.CorrelationId, retryCount);
-            }
         }
 
         #region Synchronous Retry Policies
@@ -77,13 +72,8 @@ namespace {{packageName}}.Extensions
                 .Handle<Exception>()
                 .Fallback(
                     (outcome, ctx, ct) => outcome.Result,
-                    (outcome, ctx) =>
-                    {
-                        // Add logging or other logic here 
-                        if (Environment.GetEnvironmentVariable("SDK_LOGGING") != null)
-                        {
-                            Console.WriteLine("FALLBACK action triggered: {0}", ctx.CorrelationId);
-                        }
+                    (outcome, ctx) => {
+                        // Add logging or other logic here
                     });
 
 
@@ -163,6 +153,8 @@ namespace {{packageName}}.Extensions
                         if (Environment.GetEnvironmentVariable("SDK_LOGGING") != null)
                         {
                             Console.WriteLine("ASYNC FALLBACK action triggered: {0}", ctx.CorrelationId);
+                            Console.WriteLine("Outcome Result: {0}", outcome.Result);
+                            Console.WriteLine("Outcome Exception: {0}", outcome.Exception);
                         }
                         return Task.CompletedTask;
                     });
