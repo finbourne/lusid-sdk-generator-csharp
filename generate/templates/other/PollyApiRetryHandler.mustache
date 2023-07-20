@@ -146,7 +146,7 @@ namespace {{packageName}}.Extensions
             Policy<HttpResponseMessage>
                 .Handle<Exception>()
                 .FallbackAsync(
-                    (outcome, b, c) => Task.FromResult(outcome.Result),
+                    (outcome, b, c) => Task.FromException<HttpResponseMessage>(outcome.Exception),
                     (outcome, ctx) =>
                     {
                         // Add logging or other logic here 
