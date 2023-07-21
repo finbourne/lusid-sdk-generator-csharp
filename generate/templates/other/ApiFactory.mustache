@@ -112,6 +112,7 @@ namespace {{packageName}}.Extensions
                 RetryConfiguration.AsyncRetryPolicy ?? PollyApiRetryHandler.DefaultRetryPolicyWithFallbackAsync;
 
             var handler = new SocketsHttpHandler();
+            handler.AutomaticDecompression = DecompressionMethods.All;
             handler.ConnectCallback = async (ctx, ct) =>
             {
                 var s = new Socket(SocketType.Stream, ProtocolType.Tcp) { NoDelay = true };
@@ -148,6 +149,8 @@ namespace {{packageName}}.Extensions
             client.DefaultRequestVersion = HttpVersion.Version20;
             client.Timeout = TimeSpan.FromMinutes(60);
             client.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher;
+            client.DefaultRequestHeaders.AcceptEncoding.Add(StringWithQualityHeaderValue.Parse("br"));
+            client.DefaultRequestHeaders.AcceptEncoding.Add(StringWithQualityHeaderValue.Parse("deflate"));
 
             var dict = new Dictionary<Type, IApiAccessor>();
             foreach (Type api in ApiTypes)
