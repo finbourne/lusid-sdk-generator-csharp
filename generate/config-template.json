@@ -7,7 +7,7 @@
   "packageCopyright": "FINBOURNE Technology Ltd",
   "gitUserId": "finbourne",
   "packageGuid": "B7B63DA8-4A51-45B1-A389-B1427246E439",
-  "library": "httpclient",
+  "library": "restsharp",
   "sourceFolder": ".",
   "targetFramework": "net6.0",
   "useDateTimeOffset": true,

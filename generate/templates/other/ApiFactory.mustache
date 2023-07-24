@@ -156,7 +156,7 @@ namespace {{packageName}}.Extensions
             var dict = new Dictionary<Type, IApiAccessor>();
             foreach (Type api in ApiTypes)
             {
-                if (!(Activator.CreateInstance(api, client, configuration, null) is IApiAccessor impl))
+                if (!(Activator.CreateInstance(api, configuration) is IApiAccessor impl))
                 {
                     throw new Exception($"Unable to create type {api}");
                 }
