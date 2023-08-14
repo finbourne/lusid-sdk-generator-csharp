@@ -72,7 +72,8 @@ namespace {{packageName}}.Extensions
             };
             
             configuration.DefaultHeaders.Add("X-LUSID-Application", apiConfiguration.ApplicationName);
-
+            configuration.MergeWithGlobalConfiguration();
+            
             _apis = Init(configuration);
         }
 

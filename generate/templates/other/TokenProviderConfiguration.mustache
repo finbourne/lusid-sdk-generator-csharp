@@ -1,6 +1,8 @@
 ﻿{{>partial_header}}
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using {{packageName}}.Client;
 
 namespace {{packageName}}.Extensions
@@ -27,6 +29,46 @@ namespace {{packageName}}.Extensions
         {
             get => _tokenProvider.GetAuthenticationTokenAsync().Result;
             set => throw new InvalidOperationException("AccessToken is not assignable");
+        }
+
+        /// <summary>
+        /// Merge configuration with the global config.
+        /// </summary>
+        public void MergeWithGlobalConfiguration()
+        {
+            var global = GlobalConfiguration.Instance;
+
+            Dictionary<string, string> apiKey = global.ApiKey.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            Dictionary<string, string> apiKeyPrefix = global.ApiKeyPrefix.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            Dictionary<string, string> defaultHeaders = global.DefaultHeaders.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            foreach (var kvp in ApiKey) apiKey[kvp.Key] = kvp.Value;
+            foreach (var kvp in ApiKeyPrefix) apiKeyPrefix[kvp.Key] = kvp.Value;
+            foreach (var kvp in DefaultHeaders) defaultHeaders[kvp.Key] = kvp.Value;
+
+            ApiKey = apiKey;
+            ApiKeyPrefix = apiKeyPrefix;
+            DefaultHeaders = defaultHeaders;
+            BasePath = BasePath ?? global.BasePath;
+            Timeout = Timeout;
+            Proxy = Proxy ?? global.Proxy;
+            UserAgent = UserAgent ?? global.UserAgent;
+            Username = Username ?? global.Username;
+            Password = Password ?? global.Password;
+            {{#useRestSharp}}
+            {{#hasOAuthMethods}}
+            OAuthTokenUrl = OAuthTokenUrl ?? global.OAuthTokenUrl;
+            OAuthClientId = OAuthClientId ?? global.OAuthClientId;
+            OAuthClientSecret = OAuthClientSecret ?? global.OAuthClientSecret;
+            OAuthFlow = OAuthFlow ?? global.OAuthFlow;
+            {{/hasOAuthMethods}}
+            {{/useRestSharp}}
+            {{#hasHttpSignatureMethods}}
+            HttpSigningConfiguration = HttpSigningConfiguration ?? global.HttpSigningConfiguration;
+            {{/hasHttpSignatureMethods}}
+            TempFolderPath = TempFolderPath ?? global.TempFolderPath;
+            DateTimeFormat = DateTimeFormat ?? global.DateTimeFormat;
+            ClientCertificates = ClientCertificates ?? global.ClientCertificates;
         }
     }
 }
