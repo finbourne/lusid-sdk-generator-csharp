@@ -92,7 +92,7 @@ publish-cicd SRC_DIR:
     set -e
     dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} /p:PackageId=${PACKAGE_NAME} {{SRC_DIR}}
     find {{SRC_DIR}} -name "*.nupkg" -type f -exec \
-        dotnet nuget push {} \
+        dotnet nuget push {} --skip-duplicate \
             --source ${REPO_URL} \
             --api-key ${API_KEY} \;
 
