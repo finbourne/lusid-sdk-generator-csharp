@@ -116,3 +116,20 @@ generate-and-publish-cicd OUT_DIR:
     @just generate-cicd {{OUT_DIR}}
     @just publish-cicd {{OUT_DIR}}
 
+test-local:
+    docker run \
+        -e PROJECT_NAME=${PROJECT_NAME} \
+        -e FBN_API_TEST_APP_NAME=${APPLICATION_NAME} \
+        -e GIT_REPO_NAME=${GIT_REPO_NAME} \
+        -e FBN_TOKEN_URL=${FBN_TOKEN_URL} \
+        -e FBN_ACCESS_TOKEN=${FBN_ACCESS_TOKEN} \
+        -e FBN_USERNAME=${FBN_USERNAME} \
+        -e FBN_CLIENT_ID=${FBN_CLIENT_ID} \
+        -e FBN_CLIENT_SECRET=${FBN_CLIENT_SECRET} \
+        -e FBN_LUSID_API_URL=${FBN_LUSID_API_URL} \
+        -e FBN_APP_NAME=${FBN_APP_NAME} \
+        -e FBN_PASSWORD=${FBN_PASSWORD} \
+        -w /usr/src/tests \
+        -v $(pwd)/generate/.output/sdk/:/usr/src/sdk/ \
+        -v $(pwd)/tests/:/usr/src/tests/ \
+        mcr.microsoft.com/dotnet/sdk:6.0 bash -- run-tests.sh
