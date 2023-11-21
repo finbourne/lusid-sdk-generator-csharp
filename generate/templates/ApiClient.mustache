@@ -507,8 +507,7 @@ namespace {{packageName}}.Client
                 MaxTimeout = configuration.Timeout,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent,
-                ConfigureMessageHandler = ConfigureMessageHandler,
-                Encode = s => System.Uri.EscapeDataString(s)
+                ConfigureMessageHandler = ConfigureMessageHandler
             };
 
             {{#hasOAuthMethods}}
@@ -621,8 +620,7 @@ namespace {{packageName}}.Client
                 MaxTimeout = configuration.Timeout,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent,
-                ConfigureMessageHandler = ConfigureMessageHandler,
-                Encode = s => System.Uri.EscapeDataString(s)
+                ConfigureMessageHandler = ConfigureMessageHandler
             };
 
             {{#hasOAuthMethods}}
