@@ -332,7 +332,7 @@ namespace {{packageName}}.Client
             {
                 foreach (var pathParam in options.PathParameters)
                 {
-                    request.AddParameter(pathParam.Key, pathParam.Value, ParameterType.UrlSegment, false);
+                    request.AddParameter(pathParam.Key, pathParam.Value, ParameterType.UrlSegment);
                 }
             }
 
@@ -507,7 +507,8 @@ namespace {{packageName}}.Client
                 MaxTimeout = configuration.Timeout,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent,
-                ConfigureMessageHandler = ConfigureMessageHandler
+                ConfigureMessageHandler = ConfigureMessageHandler,
+                Encode = s => System.Uri.EscapeDataString(s)
             };
 
             {{#hasOAuthMethods}}
@@ -620,7 +621,8 @@ namespace {{packageName}}.Client
                 MaxTimeout = configuration.Timeout,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent,
-                ConfigureMessageHandler = ConfigureMessageHandler
+                ConfigureMessageHandler = ConfigureMessageHandler,
+                Encode = s => System.Uri.EscapeDataString(s)
             };
 
             {{#hasOAuthMethods}}
