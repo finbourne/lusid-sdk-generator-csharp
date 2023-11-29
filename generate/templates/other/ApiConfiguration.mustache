@@ -1,6 +1,7 @@
 {{>partial_header}}
 
 using System.Collections.Generic;
+using Microsoft.Extensions.Configuration;
 
 namespace {{packageName}}.Extensions
 {
@@ -37,6 +38,7 @@ namespace {{packageName}}.Extensions
         /// <summary>
         /// {{#lambda.titlecase}}{{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}{{/lambda.titlecase}} Api Url
         /// </summary>
+        [ConfigurationKeyName("{{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}")]
         public string BaseUrl { get; set; }
 
         /// <summary>
