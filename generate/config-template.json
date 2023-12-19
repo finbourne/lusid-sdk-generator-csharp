@@ -18,6 +18,7 @@
   "caseInsensitiveResponseHeaders": true,
   "packageTags": "FINBOURNE, LUSID, SDK",
   "excludeTests": true,
+  "optionalEmitDefaultValues": false,
   "files": {
     "other/ApiConfiguration.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
