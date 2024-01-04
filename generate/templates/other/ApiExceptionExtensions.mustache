@@ -12,6 +12,7 @@ namespace {{packageName}}.Extensions
     ///</summary>
     public static class ApiExceptionExtensions
     {
+        {{#generate_validation_exception_code}}
         /// <summary>
         /// Identify whether the API exception was caused by a request validation problem
         /// </summary>
@@ -60,6 +61,7 @@ namespace {{packageName}}.Extensions
                 });
         }
 
+        {{/generate_validation_exception_code}}
         /// <summary>
         /// Return the details of a problem
         /// In case the ErrorContent object that gets returned is not a valid deserializable LusidProblemDetails JSON, a null be returned

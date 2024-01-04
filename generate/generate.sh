@@ -60,6 +60,9 @@ cp $ignore_file $sdk_output_folder
 # cat $config_file | jq -r --arg SDK_VERSION "$sdk_version" '.packageVersion |= $SDK_VERSION' > temp && mv temp $config_file
 # sed -i 's/<Version>.*<\/Version>/<Version>'$sdk_version'<\/Version>/g' $sdk_output_folder/$app_name/$app_name.csproj
 
+
+if grep -q LusidValidationProblemDetails $swagger_file; then export GENERATE_VALIDATION_EXCEPTION_CODE=",generate_validation_exception_code=true" ; fi
+
 echo "[INFO] generating sdk version: ${PACKAGE_VERSION}"
 
 #java -jar swagger-codegen-cli.jar swagger-codegen-cli help
@@ -69,7 +72,7 @@ java ${JAVA_OPTS} -jar /opt/openapi-generator/modules/openapi-generator-cli/targ
     -o $sdk_output_folder \
     -c $config_file \
     -t $gen_root/templates \
-    --additional-properties=application=${APPLICATION_NAME},meta_request_id_header_key=${META_REQUEST_ID_HEADER_KEY} \
+    --additional-properties=application=${APPLICATION_NAME},meta_request_id_header_key=${META_REQUEST_ID_HEADER_KEY}${GENERATE_VALIDATION_EXCEPTION_CODE} \
 	--type-mappings dateorcutlabel=DateTimeOrCutLabel \
     --type-mappings double=decimal \
     --git-repo-id=${GIT_REPO_NAME}
