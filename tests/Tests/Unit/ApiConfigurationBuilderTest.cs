@@ -84,7 +84,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 {"password", "<password>"},
                 {"clientId", "<clientId>"},
                 {"clientSecret", "<clientSecret>"},
-                {"baseUrl", string.Format("<{0}Url>", "test")},
+                {"lusidUrl", string.Format("<{0}Url>", "test")},
             });
             var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
             Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
@@ -105,7 +105,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 {"password", "<password>"},
                 // {"clientId", "<clientId>"},
                 {"clientSecret", "<clientSecret>"},
-                {"baseUrl", string.Format("<{0}Url>", "test")},
+                {"lusidUrl", string.Format("<{0}Url>", "test")},
             });
             var exception = Assert.Throws<MissingConfigException>(() => ApiConfigurationBuilder.Build(_secretsFile));
             Assert.That(exception.Message,
@@ -158,7 +158,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var settings = new Dictionary<string, string>
             {
                 { "api:TokenUrl", "<tokenUrl>" },
-                { "api:BaseUrl", string.Format("<env.{0}Url>", "test") },
+                { "api:LusidUrl", string.Format("<env.{0}Url>", "test") },
                 { "api:ClientId", "<clientId>" },
                 { "api:ClientSecret", "<clientSecret>" },
                 { "api:Username", "<username>" },
@@ -191,7 +191,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var settings = new Dictionary<string, string>
             {
                 { "api:TokenUrl", "<tokenUrl>" },
-                { "api:BaseUrl", string.Format("<{0}Url>", "test") },
+                { "api:LusidUrl", string.Format("<{0}Url>", "test") },
                 { "api:ClientId", "<clientId>" },
                 { "api:ClientSecret", "" },
                 { "api:Username", "<username>" },
