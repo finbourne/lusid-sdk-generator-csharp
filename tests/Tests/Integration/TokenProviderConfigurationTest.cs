@@ -11,18 +11,18 @@ namespace Finbourne.Sdk.Extensions.Tests.Integration
 
         //Test requires [assembly: InternalsVisibleTo("namespace Finbourne.Sdk.Extensions.IntegrationTests")] in SDK project.
         [Test]
-        public void Construct_AccessToken_NonNull()
+        public void Construct_AccessToken_OIDC_NonNull()
         {
-            ITokenProvider tokenProvider;
-            if (ApiConfig.Value.MissingSecretVariables)
-            {
-                tokenProvider = new PersonalAccessTokenProvider(ApiConfig.Value.PersonalAccessToken);
-            }
-            else
-            {
-                tokenProvider = new ClientCredentialsFlowTokenProvider(ApiConfigurationBuilder.Build("secrets.json"));
-            }
+            ITokenProvider tokenProvider = new ClientCredentialsFlowTokenProvider(ApiConfigurationBuilder.Build("secrets.json"));
 
+            var config = new TokenProviderConfiguration(tokenProvider);
+            Assert.IsNotNull(config.AccessToken);
+        }
+
+                [Test]
+        public void Construct_AccessToken_PAT_NonNull()
+        {
+            ITokenProvider tokenProvider = new PersonalAccessTokenProvider(ApiConfig.Value.PersonalAccessToken);
             var config = new TokenProviderConfiguration(tokenProvider);
             Assert.IsNotNull(config.AccessToken);
         }
