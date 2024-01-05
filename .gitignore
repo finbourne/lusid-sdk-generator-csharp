@@ -10,3 +10,6 @@
 
 # ignore any swagger.json file that ends up in here
 swagger.json
+
+**/bin/
+**/obj/
