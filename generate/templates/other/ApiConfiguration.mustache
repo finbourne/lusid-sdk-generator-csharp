@@ -1,6 +1,8 @@
 {{>partial_header}}
 
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 
 namespace {{packageName}}.Extensions
@@ -117,7 +119,10 @@ namespace {{packageName}}.Extensions
 
             if (string.IsNullOrWhiteSpace(BaseUrl))
             {
-                missingConfig.Add(nameof(BaseUrl));
+                PropertyInfo propertyInfo = typeof(ApiConfiguration).GetProperty(nameof(BaseUrl));
+                var attribute = (ConfigurationKeyNameAttribute)Attribute.GetCustomAttribute(propertyInfo!, typeof(ConfigurationKeyNameAttribute));
+
+                missingConfig.Add(attribute!.Name);
             }
 
             return missingConfig;
