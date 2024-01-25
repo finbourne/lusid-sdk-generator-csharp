@@ -133,3 +133,8 @@ test-local:
         -v $(pwd)/generate/.output/sdk/:/usr/src/sdk/ \
         -v $(pwd)/tests/:/usr/src/tests/ \
         mcr.microsoft.com/dotnet/sdk:6.0 bash -- run-tests.sh
+
+get-templates:
+    docker run \
+        -v {{justfile_directory()}}/.templates:/usr/src/out \
+        finbourne/lusid-sdk-gen-csharp:latest author template -g csharp-netcore 

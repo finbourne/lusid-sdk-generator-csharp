@@ -1,6 +1,7 @@
 {{>partial_header}}
 
 using System.Collections.Generic;
+using {{packageName}}.Extensions;
 
 namespace {{packageName}}.Client
 {
@@ -35,7 +36,9 @@ namespace {{packageName}}.Client
 
         static GlobalConfiguration()
         {
-            Instance = new GlobalConfiguration();
+            Instance = new GlobalConfiguration(){
+                HttpClientFactory = new TcpKeepAliveHttpClientFactory()
+            };
             Instance.DefaultHeaders.Add("X-LUSID-Sdk-Language", "C#");
             Instance.DefaultHeaders.Add("X-LUSID-Sdk-Version", Version);
         }
