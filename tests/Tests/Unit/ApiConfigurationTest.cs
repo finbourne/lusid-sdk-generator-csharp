@@ -111,7 +111,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             config.BaseUrl = String.Empty;
             List<string> missingList = config.GetMissingConfig();
             Assert.That(missingList.Count, Is.EqualTo(1), "GetMissingConfig list contains one item");
-            Assert.That(missingList[0], Is.EqualTo(nameof(config.BaseUrl)), "GetMissingConfig list string correct");
+            Assert.That(missingList[0], Is.EqualTo("lusidUrl"), "GetMissingConfig list string correct");
         }
 
         [Test]
