@@ -9,13 +9,15 @@ using RestSharp;
 
 namespace {{packageName}}.Extensions;
 
-internal class TcpKeepAliveHttpClientFactory : IHttpClientFactory
+internal static class TcpKeepAlive
 {
-    public HttpClient New(RestClientOptions options)
+    public static HttpMessageHandler CreateTcpKeepAliveMessageHandler(RestClientOptions options)
     {
 
-        var handler = new SocketsHttpHandler();
-        handler.SslOptions = new SslClientAuthenticationOptions();
+        var handler = new SocketsHttpHandler
+        {
+            SslOptions = new SslClientAuthenticationOptions()
+        };
         // this stuff is mostly copied from RestClient to set options on the handler
         if (!OperatingSystem.IsBrowser()) {
             handler.UseCookies             = false;
@@ -127,7 +129,7 @@ internal class TcpKeepAliveHttpClientFactory : IHttpClientFactory
                 s.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, 300);
                 s.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, 300);
 
-                var addresses = await Dns.GetHostAddressesAsync(ctx.DnsEndPoint.Host);
+                var addresses = await Dns.GetHostAddressesAsync(ctx.DnsEndPoint.Host, ct);
                 var endpoint = new IPEndPoint(addresses[0], ctx.DnsEndPoint.Port);
                 await s.ConnectAsync(endpoint, ct);
                 return new NetworkStream(s, ownsSocket: true);
@@ -146,7 +148,7 @@ internal class TcpKeepAliveHttpClientFactory : IHttpClientFactory
                 throw;
             }
         };
-        return new HttpClient(handler, disposeHandler:true);
+        return handler;
     }
 
 }

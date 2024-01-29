@@ -33,6 +33,8 @@ using Polly;
 {{#hasOAuthMethods}}
 using {{packageName}}.Client.Auth;
 {{/hasOAuthMethods}}
+using Lusid.Sdk.Extensions;
+
 
 namespace {{packageName}}.Client
 {
@@ -212,6 +214,8 @@ namespace {{packageName}}.Client
     {{>visibility}} partial class ApiClient : ISynchronousClient{{#supportsAsync}}, IAsynchronousClient{{/supportsAsync}}
     {
         private readonly string _baseUrl;
+        private readonly Func<RestClientOptions, HttpMessageHandler> _createHttpMessageHandler;
+        private readonly bool _disposeHandler;
 
         /// <summary>
         /// Specifies the settings on a <see cref="JsonSerializer" /> object.
@@ -247,22 +251,23 @@ namespace {{packageName}}.Client
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiClient" />, defaulting to the global configurations' base url.
         /// </summary>
-        public ApiClient()
+        public ApiClient():this(Lusid.Sdk.Client.GlobalConfiguration.Instance.BasePath)
         {
-            _baseUrl = {{packageName}}.Client.GlobalConfiguration.Instance.BasePath;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiClient" />
         /// </summary>
         /// <param name="basePath">The target service's base path in URL format.</param>
+        /// <param name="CreateHttpMessageHandler">A function to create a HttpMessageHandler for each REST request</param>
+        /// <param name="disposeHandler">Should the HttpMessageHandler be disposed of after each request</param>
         /// <exception cref="ArgumentException"></exception>
-        public ApiClient(string basePath)
-        {
+        public ApiClient(string basePath, Func<RestClientOptions, HttpMessageHandler>? CreateHttpMessageHandler = null, bool disposeHandler = true){
             if (string.IsNullOrEmpty(basePath))
                 throw new ArgumentException("basePath cannot be empty");
-
             _baseUrl = basePath;
+            _createHttpMessageHandler = CreateHttpMessageHandler ?? TcpKeepAlive.CreateTcpKeepAliveMessageHandler;
+            _disposeHandler = disposeHandler;
         }
 
         /// <summary>
@@ -524,7 +529,7 @@ namespace {{packageName}}.Client
                     configuration);
             }
 
-           var httpClient = configuration.HttpClientFactory.New(clientOptions);
+           var httpClient = new HttpClient(_createHttpMessageHandler(clientOptions), _disposeHandler);
 
             var client = new RestClient(httpClient,
                 options: clientOptions,
@@ -639,7 +644,7 @@ namespace {{packageName}}.Client
                     configuration);
             }
 
-            var httpClient = configuration.HttpClientFactory.New(clientOptions);
+           var httpClient = new HttpClient(_createHttpMessageHandler(clientOptions), _disposeHandler);
 
             var client = new RestClient(httpClient,
                 options: clientOptions,

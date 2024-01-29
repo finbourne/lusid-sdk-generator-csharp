@@ -76,13 +76,9 @@
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "TokenProviderConfiguration.cs"
     },
-    "other/IHttpClientFactory.mustache": {
+    "other/TcpKeepAlive.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
-      "destinationFilename": "IHttpClientFactory.cs"
-    },
-    "other/TcpKeepAliveHttpClientFactory.mustache": {
-      "folder": "${PROJECT_NAME}/Extensions",
-      "destinationFilename": "TcpKeepAliveHttpClientFactory.cs"
+      "destinationFilename": "TcpKeepAlive.cs"
     }
   }
 }
