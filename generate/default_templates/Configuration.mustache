@@ -702,6 +702,7 @@ namespace {{packageName}}.Client
                 TempFolderPath = second.TempFolderPath ?? first.TempFolderPath,
                 DateTimeFormat = second.DateTimeFormat ?? first.DateTimeFormat,
                 ClientCertificates = second.ClientCertificates ?? first.ClientCertificates,
+                HttpMessageHandler =  second.HttpMessageHandler ?? first.HttpMessageHandler,
             };
             return config;
         }
