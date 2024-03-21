@@ -14,6 +14,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     [TestFixture]
     public class ApiClientTest
     {
+
         [Test]
         public void PercentEncodedSlashSent(){
             var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
@@ -26,20 +27,15 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(req.RequestUri!.AbsolutePath ?? "oops")
                 });
-            var httpClient = new HttpClient(handler.Object);
-            var HttpClientFactoryMock = new Mock<IHttpClientFactory>();
-            HttpClientFactoryMock.Setup(httpClientFactory=>httpClientFactory.New(It.IsAny<RestClientOptions>())).Returns(httpClient);
-            var apiClient = new ApiClient("http://example.com");
+            Func<RestClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
+            var apiClient = new ApiClient("http://example.com", CreateHttpMessageHandler : HttpClientFactoryMock);
             var requestOptions = new RequestOptions(){
                 Operation = "GET",
                 PathParameters=new Dictionary<string, string>(){
                     {"arg", "prefix-%2F-suffix"}
                 }
             };
-            var config = new Configuration(){
-                HttpClientFactory = HttpClientFactoryMock.Object
-            };
-            var res = apiClient.Get<String>("/{arg}", requestOptions, configuration:config);
+            var res = apiClient.Get<String>("/{arg}", requestOptions);
 
             var req = new RestRequest(new Uri("http://example.com/{arg}"));
             
