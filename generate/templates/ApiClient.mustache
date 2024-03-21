@@ -529,7 +529,7 @@ namespace {{packageName}}.Client
                     configuration);
             }
 
-           var httpClient = new HttpClient(_createHttpMessageHandler(clientOptions), _disposeHandler);
+            var httpClient = new HttpClient(_createHttpMessageHandler(clientOptions), _disposeHandler);
 
             var client = new RestClient(httpClient,
                 options: clientOptions,
