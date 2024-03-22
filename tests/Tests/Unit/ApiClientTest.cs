@@ -14,7 +14,17 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     [TestFixture]
     public class ApiClientTest
     {
-
+        /// <summary>
+        /// Test to ensure that slashes that have been properly escaped in requests
+        /// are sent to the server unmodified.
+        /// Workaround for slashes in segment parameters not being
+        /// supported in RestSharp
+        /// https://github.com/restsharp/RestSharp/issues/707#issuecomment-636462446
+        /// https://github.com/restsharp/RestSharp/blob/dev/src/RestSharp/Parameters/UrlSegmentParameter.cs#L26
+        /// 
+        /// %2F should be encoded to %252F
+        /// PREVIOUS BEHAVIOUR: %2F -> %2F
+        /// </summary>
         [Test]
         public void PercentEncodedSlashSent(){
             var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
