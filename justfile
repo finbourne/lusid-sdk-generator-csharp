@@ -27,7 +27,7 @@ export PACKAGE_NAME               := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
 export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
 export ASSEMBLY_VERSION           := `echo ${ASSEMBLY_VERSION:-2.0.0}`
 export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.9999.0-alpha.nupkg}`
-export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid_identity}`
+export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
 export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
 
