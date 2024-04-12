@@ -11,6 +11,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     public class ApiConfigurationBuilderTest
     {
         private readonly string APP = Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToUpper();
+        private readonly string AppUrlName = $"{Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToLower()}Url";
         private string _secretsFile;
         private string _cachedTokenUrl;
         private string _cachedBaseUrl;
@@ -84,7 +85,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 {"password", "<password>"},
                 {"clientId", "<clientId>"},
                 {"clientSecret", "<clientSecret>"},
-                {"lusidUrl", string.Format("<{0}Url>", "test")},
+                {AppUrlName, string.Format("<{0}Url>", "test")},
             });
             var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
             Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
@@ -105,7 +106,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 {"password", "<password>"},
                 // {"clientId", "<clientId>"},
                 {"clientSecret", "<clientSecret>"},
-                {"lusidUrl", string.Format("<{0}Url>", "test")},
+                {AppUrlName, string.Format("<{0}Url>", "test")},
             });
             var exception = Assert.Throws<MissingConfigException>(() => ApiConfigurationBuilder.Build(_secretsFile));
             Assert.That(exception.Message,
@@ -158,7 +159,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var settings = new Dictionary<string, string>
             {
                 { "api:TokenUrl", "<tokenUrl>" },
-                { "api:LusidUrl", string.Format("<env.{0}Url>", "test") },
+                { $"api:{AppUrlName}", string.Format("<env.{0}Url>", "test") },
                 { "api:ClientId", "<clientId>" },
                 { "api:ClientSecret", "<clientSecret>" },
                 { "api:Username", "<username>" },
@@ -191,7 +192,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var settings = new Dictionary<string, string>
             {
                 { "api:TokenUrl", "<tokenUrl>" },
-                { "api:LusidUrl", string.Format("<{0}Url>", "test") },
+                { $"api:{AppUrlName}", string.Format("<{0}Url>", "test") },
                 { "api:ClientId", "<clientId>" },
                 { "api:ClientSecret", "" },
                 { "api:Username", "<username>" },

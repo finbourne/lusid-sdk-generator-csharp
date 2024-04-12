@@ -7,6 +7,9 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     [TestFixture]
     public class ApiConfigurationTest
     {
+
+        private readonly string AppUrlName = $"{Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToLower()}Url";
+
         [Test]
         public void ApiConfiguration_HasMissingConfig_Missing_TokenUrl_Returns_True()
         {
@@ -111,7 +114,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             config.BaseUrl = String.Empty;
             List<string> missingList = config.GetMissingConfig();
             Assert.That(missingList.Count, Is.EqualTo(1), "GetMissingConfig list contains one item");
-            Assert.That(missingList[0], Is.EqualTo("lusidUrl"), "GetMissingConfig list string correct");
+            Assert.That(missingList[0], Is.EqualTo(AppUrlName), "GetMissingConfig list string correct");
         }
 
         [Test]
