@@ -40,14 +40,14 @@ namespace {{packageName}}.Extensions
         /// <summary>
         /// {{#lambda.titlecase}}{{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}{{/lambda.titlecase}} Api Url
         /// </summary>
-        [ConfigurationKeyName("{{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}Url")]
+        [ConfigurationKeyName("{{#lambda.snakecase}}{{application}}{{/lambda.snakecase}}Url")]
         public string BaseUrl { get; set; }
 
 
         /// <summary>
         /// {{#lambda.snakecase}}{{application}}{{/lambda.snakecase}} Api Url
         /// </summary>
-        [ConfigurationKeyName("{{#lambda.snakecase}}{{application}}{{/lambda.snakecase}}Url")]
+        [ConfigurationKeyName("{{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}Url")]
         public string BackUpBaseUrl { get; set; }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace {{packageName}}.Extensions
 
             if(string.IsNullOrWhiteSpace(BackUpBaseUrl) && string.IsNullOrWhiteSpace(BaseUrl))
             {
-                PropertyInfo propertyInfo = typeof(ApiConfiguration).GetProperty(nameof(BaseUrl));
+                PropertyInfo propertyInfo = typeof(ApiConfiguration).GetProperty(nameof(BackUpBaseUrl));
                 var attribute = (ConfigurationKeyNameAttribute)Attribute.GetCustomAttribute(propertyInfo!, typeof(ConfigurationKeyNameAttribute));
 
                 missingConfig.Add(attribute!.Name);

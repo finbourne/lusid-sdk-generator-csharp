@@ -209,6 +209,67 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     "The provided configuration section is missing the following required values: ['Password', 'ClientSecret']"));
         }
 
+        [Test]
+        public void Test_Application_Names_With_UnderScores()
+        {
+            if(!AppUrlName.Contains("_") && !AppUrlName.Contains("-"))
+            {
+                Assert.Inconclusive();
+            }
+            
+            string underScoreAppUrlName = AppUrlName.Replace('-','_');
+
+            PopulateDummySecretsFile(new Dictionary<string, string>
+            {
+                {"tokenUrl", "<tokenUrl>"},
+                {"username", "<username>"},
+                {"password", "<password>"},
+                {"clientId", "<clientId>"},
+                {"clientSecret", "<clientSecret>"},
+                {underScoreAppUrlName, "<baseUrl>"},
+            });
+
+            var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
+
+            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
+            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
+            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
+            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
+            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
+            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo("<baseUrl>"));
+        }
+
+        [Test]
+        public void Test_Application_Names_With_Dashes()
+        {
+            if(!AppUrlName.Contains("_") && !AppUrlName.Contains("-"))
+            {
+                Assert.Inconclusive();
+            }
+
+            string dashAppUrlName = AppUrlName.Replace('_','-');
+
+            PopulateDummySecretsFile(new Dictionary<string, string>
+            {
+                {"tokenUrl", "<tokenUrl>"},
+                {"username", "<username>"},
+                {"password", "<password>"},
+                {"clientId", "<clientId>"},
+                {"clientSecret", "<clientSecret>"},
+                {dashAppUrlName, "<baseUrl>"},
+            });
+
+            var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
+
+            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
+            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
+            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
+            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
+            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
+            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo("<baseUrl>"));
+        }
+
+
         private void PopulateDummySecretsFile(Dictionary<string, string> config)
         {
             var secrets = new Dictionary<string, object>

@@ -63,6 +63,8 @@ namespace {{packageName}}.Extensions
             var apiConfig = new ApiConfiguration();
             config.Bind(apiConfig);
 
+            apiConfig = CheckBaseUrl(apiConfig);
+
             if (apiConfig.HasMissingConfig())
             {
                 var missingValues = apiConfig.GetMissingConfig()
@@ -117,6 +119,8 @@ namespace {{packageName}}.Extensions
                             .Build();
             config.GetSection("api").Bind(apiConfig);
 
+            apiConfig = CheckBaseUrl(apiConfig);
+
             if (apiConfig.HasMissingConfig())
             {
                 var missingValues = apiConfig.GetMissingConfig()
@@ -127,6 +131,16 @@ namespace {{packageName}}.Extensions
             }
 
             return apiConfig;
+        }
+
+        private static ApiConfiguration CheckBaseUrl(ApiConfiguration parsedConfig) 
+        {
+            if(string.IsNullOrWhiteSpace(parsedConfig.BaseUrl))
+            {
+                parsedConfig.BaseUrl = parsedConfig.BackUpBaseUrl;
+            }
+
+            return parsedConfig;
         }
     }
 }

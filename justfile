@@ -16,7 +16,7 @@
 #  honeycomb
 #  lusid-identity
 #  lusid-access
-#  drive
+#  lusid-drive
 #  notifications
 #  scheduler2
 #  insights
@@ -145,7 +145,7 @@ test-local:
         -e FBN_LUMI_API_URL=${FBN_BASE_API_URL}/honeycomb \
         -e FBN_LUSID_IDENTITY_API_URL=${FBN_BASE_API_URL}/identity \
         -e FBN_LUSID_ACCESS_API_URL=${FBN_BASE_API_URL}/access \
-        -e FBN_DRIVE_API_URL=${FBN_BASE_API_URL}/drive \
+        -e FBN_LUSID_DRIVE_API_URL=${FBN_BASE_API_URL}/drive \
         -e FBN_NOTIFICATIONS_API_URL=${FBN_BASE_API_URL}/notifications \
         -e FBN_SCHEDULER_API_URL=${FBN_BASE_API_URL}/scheduler2 \
         -e FBN_INSIGHTS_API_URL=${FBN_BASE_API_URL}/insights \
