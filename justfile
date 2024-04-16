@@ -8,6 +8,20 @@
 #    APPLICATION_NAME
 #    META_REQUEST_ID_HEADER_KEY
 #    NUGET_PACKAGE_LOCATION
+#    FBN_BASE_API_URL
+
+#  Possible Application Names. Application name is used to retrieve the correct endpoint.
+#  Underscores can be used in place of dashes
+#  lusid
+#  honeycomb
+#  lusid-identity
+#  lusid-access
+#  lusid-drive
+#  notifications
+#  scheduler2
+#  insights
+#  configuration
+
 
 export PACKAGE_NAME               := `echo ${PACKAGE_NAME:-Lusid.Sdk}`
 export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
@@ -117,6 +131,7 @@ generate-and-publish-cicd OUT_DIR:
     @just publish-cicd {{OUT_DIR}}
 
 test-local:
+    @just generate-local
     docker run \
         -e PROJECT_NAME=${PROJECT_NAME} \
         -e FBN_API_TEST_APP_NAME=${APPLICATION_NAME} \
@@ -126,7 +141,15 @@ test-local:
         -e FBN_USERNAME=${FBN_USERNAME} \
         -e FBN_CLIENT_ID=${FBN_CLIENT_ID} \
         -e FBN_CLIENT_SECRET=${FBN_CLIENT_SECRET} \
-        -e FBN_LUSID_API_URL=${FBN_LUSID_API_URL} \
+        -e FBN_LUSID_API_URL=${FBN_BASE_API_URL}/api \
+        -e FBN_LUMI_API_URL=${FBN_BASE_API_URL}/honeycomb \
+        -e FBN_LUSID_IDENTITY_API_URL=${FBN_BASE_API_URL}/identity \
+        -e FBN_LUSID_ACCESS_API_URL=${FBN_BASE_API_URL}/access \
+        -e FBN_LUSID_DRIVE_API_URL=${FBN_BASE_API_URL}/drive \
+        -e FBN_NOTIFICATIONS_API_URL=${FBN_BASE_API_URL}/notifications \
+        -e FBN_SCHEDULER_API_URL=${FBN_BASE_API_URL}/scheduler2 \
+        -e FBN_INSIGHTS_API_URL=${FBN_BASE_API_URL}/insights \
+        -e FBN_CONFIGURATION_API_URL=${FBN_BASE_API_URL}/configuration \
         -e FBN_APP_NAME=${FBN_APP_NAME} \
         -e FBN_PASSWORD=${FBN_PASSWORD} \
         -w /usr/src/tests \
