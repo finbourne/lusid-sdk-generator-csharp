@@ -97,11 +97,11 @@ namespace {{packageName}}.Extensions
         /// <param name="configuration">A set of configuration settings</param>
         /// <param name="headers">Optional: A Dictionary of headers</param>
         /// <param name="timeout">Optional: Specify the timeout duration in milliseconds. Defaults to 100,000 milliseconds (100 seconds)</param>
-        public ApiFactory(Client.Configuration configuration, IDictionary<string, string>? headers, int? timeout)
+        public ApiFactory(Client.Configuration configuration, IDictionary<string, string>? headers = null, int? timeout = null)
         {
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if(headers != null || headers.Count > 0)
+            if(headers != null)
             {
                 foreach(var header in headers)
                 {

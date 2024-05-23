@@ -68,5 +68,19 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             Assert.IsNotNull(apiFactory);
             Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, Does.ContainKey(key));
         }
+
+        [Test]
+        public void Null_Custom_Builder_Parameters()
+        {
+            var config = new TokenProviderConfiguration(new ClientCredentialsFlowTokenProvider(ApiConfigurationBuilder.Build(_secretsFile)))
+            {
+                BasePath = "base path"
+            };
+            string key = "header_key";
+            var apiFactory = new ApiFactory(config, null, null);
+
+            Assert.IsNotNull(apiFactory);
+            Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, !Does.ContainKey(key));
+        }
     }
 }

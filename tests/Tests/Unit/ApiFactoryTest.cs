@@ -74,5 +74,15 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, Does.ContainKey(key));
 
         }
+
+        [Test]
+        public void NullHeadersProvided()
+        {
+            string key = "key_name";
+            var config = new TokenProviderConfiguration(null);
+            var apiFactory = new ApiFactory(config, null, null);
+            Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, !Does.ContainKey(key));
+
+        }
     }
 }

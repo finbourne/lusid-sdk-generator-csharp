@@ -38,7 +38,7 @@ namespace {{packageName}}.Extensions
         /// <summary>
         /// Create an IApiFactory using the specified Url, Token Provider, optional headers and timeout
         /// </summary>
-        public static IApiFactory Build(string url, ITokenProvider tokenProvider, IDictionary<string, string>? headers, int? timeout = 100000)
+        public static IApiFactory Build(string url, ITokenProvider tokenProvider, IDictionary<string, string>? headers = null, int? timeout = 100000)
         {
             // TokenProviderConfiguration.ApiClient is the client used by ApiFactory and is 
             // NOT thread-safe, so there needs to be a separate instance for each instance of ApiFactory.
