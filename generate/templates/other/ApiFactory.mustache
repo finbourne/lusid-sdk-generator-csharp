@@ -91,6 +91,29 @@ namespace {{packageName}}.Extensions
             _apis = Init(configuration);
         }
 
+        /// <summary>
+        /// Create a new factory using the specified configuration
+        /// </summary>
+        /// <param name="configuration">A set of configuration settings</param>
+        /// <param name="headers">Optional: A Dictionary of headers</param>
+        /// <param name="timeout">Optional: Specify the timeout duration in milliseconds. Defaults to 100,000 milliseconds (100 seconds)</param>
+        public ApiFactory(Client.Configuration configuration, IDictionary<string, string>? headers, int? timeout)
+        {
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration));
+
+            if(headers != null || headers.Count > 0)
+            {
+                foreach(var header in headers)
+                {
+                    configuration.DefaultHeaders.Add(header.Key, header.Value);
+                }
+            }
+            configuration.MergeWithGlobalConfiguration();
+
+            _apis = Init(configuration);
+
+        }
+
         /// <inheritdoc />
         public TApi Api<TApi>() where TApi : class, IApiAccessor
         {

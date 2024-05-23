@@ -1,5 +1,8 @@
 {{>partial_header}}
 
+using System;
+using System.Collections.Generic;
+
 namespace {{packageName}}.Extensions
 {
     /// <summary>
@@ -30,6 +33,22 @@ namespace {{packageName}}.Extensions
             };
 
             return new ApiFactory(config);
+        }
+
+        /// <summary>
+        /// Create an IApiFactory using the specified Url, Token Provider, optional headers and timeout
+        /// </summary>
+        public static IApiFactory Build(string url, ITokenProvider tokenProvider, IDictionary<string, string>? headers, int? timeout = 100000)
+        {
+            // TokenProviderConfiguration.ApiClient is the client used by ApiFactory and is 
+            // NOT thread-safe, so there needs to be a separate instance for each instance of ApiFactory.
+            // Do NOT cache the ApiFactory instances (DEV-6922)
+            var config = new TokenProviderConfiguration(tokenProvider)
+            {
+                BasePath = url
+            };
+
+            return new ApiFactory(config, headers, timeout);
         }
     }
 }

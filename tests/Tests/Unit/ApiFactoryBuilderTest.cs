@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 using System;
+using Lusid.Sdk.Api;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit
 {
@@ -50,6 +51,22 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             };
             var apiFactory = new ApiFactory(config);
             Assert.IsNotNull(apiFactory);
+        }
+
+        [Test]
+        public void Custom_Builder_Parameters()
+        {
+            var config = new TokenProviderConfiguration(new ClientCredentialsFlowTokenProvider(ApiConfigurationBuilder.Build(_secretsFile)))
+            {
+                BasePath = "base path"
+            };
+            string key = "header_key";
+            var testHeaders = new Dictionary<string, string>() {{key, "testApp"}};
+            int timeOut = 50;
+            var apiFactory = new ApiFactory(config, testHeaders, timeOut);
+
+            Assert.IsNotNull(apiFactory);
+            Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, Does.ContainKey(key));
         }
     }
 }
