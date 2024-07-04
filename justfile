@@ -30,6 +30,7 @@ export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.9999.0-alpha.nup
 export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
 export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
+export EXCLUDE_TESTS              := `echo ${EXCLUDE_TESTS:-false}`
 
 swagger_path := "./swagger.json"
 
@@ -40,16 +41,19 @@ get-swagger:
     curl -s {{swagger_url}} > swagger.json
 
 build-docker-images: 
-    docker build -t finbourne/lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK -f Dockerfile .
+    docker build -t finbourne/lusid-sdk-gen-csharp:latest --ssh default=$SSH_AUTH_SOCK --platform linux/amd64/v2 -f Dockerfile .
 
 generate-local:
     envsubst < generate/config-template.json > generate/.config.json
+    rm -r generate/.output || true
     docker run \
         -e JAVA_OPTS="-Dlog.level=error" \
         -e APPLICATION_NAME=${APPLICATION_NAME} \
         -e META_REQUEST_ID_HEADER_KEY=${META_REQUEST_ID_HEADER_KEY} \
         -e ASSEMBLY_VERSION=${ASSEMBLY_VERSION} \
         -e GIT_REPO_NAME=${GIT_REPO_NAME} \
+        -e EXCLUDE_TESTS=${EXCLUDE_TESTS} \
+        -e PACKAGE_VERSION=${PACKAGE_VERSION} \
         -v $(pwd)/generate/:/usr/src/generate/ \
         -v $(pwd)/generate/.openapi-generator-ignore:/usr/src/generate/.output/.openapi-generator-ignore \
         -v $(pwd)/{{swagger_path}}:/tmp/swagger.json \
@@ -61,10 +65,10 @@ generate TARGET_DIR:
     
     # need to remove the created content before copying over the top of it.
     # this prevents deleted content from hanging around indefinitely.
-    rm -rf {{TARGET_DIR}}/sdk/${APPLICATION_NAME}
-    rm -rf {{TARGET_DIR}}/sdk/docs
-    
-    mv -R generate/.output/* {{TARGET_DIR}}
+    rm -rf {{TARGET_DIR}}/sdk
+    rm -rf {{TARGET_DIR}}/docs
+    cp -R generate/.output/* {{TARGET_DIR}}
+
 
 # Generate an SDK from a swagger.json and copy the output to the TARGET_DIR
 generate-cicd TARGET_DIR:
@@ -101,7 +105,6 @@ publish-only:
 
 publish-cicd SRC_DIR:
     echo "PACKAGE_VERSION to publish: ${PACKAGE_VERSION}"
-    set +e
     dotnet dev-certs https --trust
     set -e
     dotnet pack -c Release /p:AssemblyVersion=${ASSEMBLY_VERSION} /p:PackageVersion=${PACKAGE_VERSION} /p:PackageId=${PACKAGE_NAME} {{SRC_DIR}}
