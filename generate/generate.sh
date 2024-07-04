@@ -1,28 +1,20 @@
-#!/bin/bash -e
+#!/bin/bash
 
-if [[ ${#1} -eq 0 ]]; then
-    echo
-    echo "[ERROR] generate folder file path not specified"
-    exit 1
-fi
+set -EeTuo pipefail
 
-if [[ ${#2} -eq 0 ]]; then
-    echo
-    echo "[ERROR] output folder file path not specified"
-    exit 1
-fi
-
-if [[ ${#3} -eq 0 ]]; then
-    echo
-    echo "[ERROR] swagger file not specified"
-    exit 1
-fi
+failure() {
+    local lineno=$1
+    local msg=$2
+    echo "Failed at $lineno: $msg"
+}
+trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
 
 gen_root=$1
 output_folder=$2
 swagger_file=$3
 config_file_name=$4
 sdk_output_folder=$output_folder/sdk
+JAVA_OPTS=${JAVA_OPTS:--Dlog.level=info}
 
 if [[ -z $config_file_name || ! -f $gen_root/$config_file_name ]] ; then
     echo "[INFO] '$config_file_name' not found, using default config.json"
@@ -35,6 +27,7 @@ echo "[INFO] swagger file    : $swagger_file"
 echo "[INFO] config file     : $config_file_name"
 echo "[INFO] application     : ${APPLICATION_NAME}"
 echo "[INFO] header_key      : ${META_REQUEST_ID_HEADER_KEY}"
+echo "[INFO] exclude tests   : ${EXCLUDE_TESTS}"
 
 ignore_file_name=.openapi-generator-ignore
 config_file=$gen_root/$config_file_name
@@ -60,8 +53,8 @@ cp $ignore_file $sdk_output_folder
 # cat $config_file | jq -r --arg SDK_VERSION "$sdk_version" '.packageVersion |= $SDK_VERSION' > temp && mv temp $config_file
 # sed -i 's/<Version>.*<\/Version>/<Version>'$sdk_version'<\/Version>/g' $sdk_output_folder/$app_name/$app_name.csproj
 
-
-if grep -q LusidValidationProblemDetails $swagger_file; then export GENERATE_VALIDATION_EXCEPTION_CODE=",generate_validation_exception_code=true" ; fi
+GENERATE_VALIDATION_EXCEPTION_CODE=""
+if grep -q LusidValidationProblemDetails $swagger_file; then GENERATE_VALIDATION_EXCEPTION_CODE=",generate_validation_exception_code=true" ; fi
 
 echo "[INFO] generating sdk version: ${PACKAGE_VERSION}"
 

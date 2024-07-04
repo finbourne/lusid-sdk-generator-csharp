@@ -17,7 +17,7 @@
   "disallowAdditionalPropertiesIfNotPresent": "true",
   "caseInsensitiveResponseHeaders": true,
   "packageTags": "FINBOURNE, LUSID, SDK",
-  "excludeTests": true,
+  "excludeTests": ${EXCLUDE_TESTS},
   "optionalEmitDefaultValues": false,
   "files": {
     "other/ApiConfiguration.mustache": {
