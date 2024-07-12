@@ -65,11 +65,35 @@ namespace {{packageName}}.Test.Api
         {
             var numRuns = 0;
             var numExamples = 1;
+            var minLength = 0;
+            var maxLength = 10;
+            var count = 0;
             while (numRuns < numExamples) {
                 numRuns += 1;
                 {{#allParams}}
                 {{#vendorExtensions.x-regex}}
-                {{{dataType}}} {{paramName}} = new Xeger(@"{{{vendorExtensions.x-regex}}}").Generate();
+                {{{dataType}}} {{paramName}} = default;
+                minLength = {{#schema.minLength}}{{schema.minLength}}{{/schema.minLength}}{{^schema.minLength}}0{{/schema.minLength}};
+                maxLength = {{#schema.maxLength}}{{schema.maxLength}}{{/schema.maxLength}}{{^schema.maxLength}}10{{/schema.maxLength}};
+                // the following is necessary to avoid url becoming longer than acceptable length
+                if (maxLength > 20) {
+                    maxLength = 20;
+                }
+                count = 0;
+                while (true)
+                {
+                    count += 1;
+                    {{paramName}} = new Xeger(@"{{{vendorExtensions.x-regex}}}").Generate();
+                    if ({{paramName}}.Length >= minLength && {{paramName}}.Length <= maxLength)
+                    {
+                        break;
+                    }
+                    if (count > 100)
+                    {
+                        throw new Exception(
+                            "unable to generate random value for parameter {{paramName}} which matches the constraints");
+                    }
+                }
                 {{/vendorExtensions.x-regex}}
                 {{^vendorExtensions.x-regex}}
                 {{#isPrimitiveType}}

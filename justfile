@@ -31,6 +31,7 @@ export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
 export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
 export EXCLUDE_TESTS              := `echo ${EXCLUDE_TESTS:-false}`
+export GIT_REPO_NAME              := `echo ${GIT_REPO_NAME:-}`
 
 swagger_path := "./swagger.json"
 
