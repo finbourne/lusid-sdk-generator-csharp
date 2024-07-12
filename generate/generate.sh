@@ -59,7 +59,10 @@ if grep -q LusidValidationProblemDetails $swagger_file; then GENERATE_VALIDATION
 echo "[INFO] generating sdk version: ${PACKAGE_VERSION}"
 
 #java -jar swagger-codegen-cli.jar swagger-codegen-cli help
+generate_api_tests=false
+if [[ $EXCLUDE_TESTS == "false" ]]; then generate_api_tests=true; fi
 java ${JAVA_OPTS} -jar /opt/openapi-generator/modules/openapi-generator-cli/target/openapi-generator-cli.jar generate \
+    --global-property modelTests=false,apiTests=${generate_api_tests} \
     -i $swagger_file \
     -g csharp-netcore \
     -o $sdk_output_folder \
