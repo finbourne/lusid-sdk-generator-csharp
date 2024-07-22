@@ -8,7 +8,7 @@
 #    APPLICATION_NAME
 #    META_REQUEST_ID_HEADER_KEY
 #    NUGET_PACKAGE_LOCATION
-#    FBN_BASE_API_URL
+#    FBN_BASE_URL
 
 #  Possible Application Names. Application name is used to retrieve the correct endpoint.
 #  Underscores can be used in place of dashes
@@ -28,6 +28,7 @@ export PROJECT_NAME               := `echo ${PROJECT_NAME:-Lusid.Sdk}`
 export ASSEMBLY_VERSION           := `echo ${ASSEMBLY_VERSION:-2.0.0}`
 export PACKAGE_VERSION            := `echo ${PACKAGE_VERSION:-2.9999.0-alpha.nupkg}`
 export APPLICATION_NAME           := `echo ${APPLICATION_NAME:-lusid}`
+export APPLICATION_SHORT_NAME     := `echo ${APPLICATION_SHORT_NAME:-lusid}`
 export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-meta-requestid}`
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
 export EXCLUDE_TESTS              := `echo ${EXCLUDE_TESTS:-true}`
@@ -47,9 +48,11 @@ build-docker-images:
 generate-local:
     envsubst < generate/config-template.json > generate/.config.json
     rm -r generate/.output || true
+    cp generate/templates/description.{{APPLICATION_SHORT_NAME}}.mustache generate/templates/description.mustache
     docker run \
         -e JAVA_OPTS="-Dlog.level=error" \
         -e APPLICATION_NAME=${APPLICATION_NAME} \
+        -e APPLICATION_SHORT_NAME=${APPLICATION_SHORT_NAME} \
         -e META_REQUEST_ID_HEADER_KEY=${META_REQUEST_ID_HEADER_KEY} \
         -e ASSEMBLY_VERSION=${ASSEMBLY_VERSION} \
         -e GIT_REPO_NAME=${GIT_REPO_NAME} \
@@ -60,6 +63,10 @@ generate-local:
         -v $(pwd)/{{swagger_path}}:/tmp/swagger.json \
         finbourne/lusid-sdk-gen-csharp:latest -- ./generate/generate.sh ./generate ./generate/.output /tmp/swagger.json .config.json
     rm -f generate/.output/.openapi-generator-ignore
+    rm generate/templates/description.mustache
+    
+    # split the README into two, and move one up a level
+    bash generate/split-readme.sh
     
 generate TARGET_DIR:
     @just generate-local
@@ -77,9 +84,13 @@ generate-cicd TARGET_DIR:
     mkdir -p ./generate/.output
     envsubst < generate/config-template.json > generate/.config.json
     cp ./generate/.openapi-generator-ignore ./generate/.output/.openapi-generator-ignore
+    cp ./generate/templates/description.{{APPLICATION_SHORT_NAME}}.mustache ./generate/templates/description.mustache
 
     ./generate/generate.sh ./generate ./generate/.output {{swagger_path}} .config.json
     rm -f generate/.output/.openapi-generator-ignore
+
+    # split the README into two, and move one up a level
+    bash generate/split-readme.sh
 
     # need to remove the created content before copying over the top of it.
     # this prevents deleted content from hanging around indefinitely.
@@ -145,15 +156,15 @@ test-local:
         -e FBN_USERNAME=${FBN_USERNAME} \
         -e FBN_CLIENT_ID=${FBN_CLIENT_ID} \
         -e FBN_CLIENT_SECRET=${FBN_CLIENT_SECRET} \
-        -e FBN_LUSID_API_URL=${FBN_BASE_API_URL}/api \
-        -e FBN_LUMI_API_URL=${FBN_BASE_API_URL}/honeycomb \
-        -e FBN_LUSID_IDENTITY_API_URL=${FBN_BASE_API_URL}/identity \
-        -e FBN_LUSID_ACCESS_API_URL=${FBN_BASE_API_URL}/access \
-        -e FBN_LUSID_DRIVE_API_URL=${FBN_BASE_API_URL}/drive \
-        -e FBN_NOTIFICATIONS_API_URL=${FBN_BASE_API_URL}/notifications \
-        -e FBN_SCHEDULER_API_URL=${FBN_BASE_API_URL}/scheduler2 \
-        -e FBN_INSIGHTS_API_URL=${FBN_BASE_API_URL}/insights \
-        -e FBN_CONFIGURATION_API_URL=${FBN_BASE_API_URL}/configuration \
+        -e FBN_LUSID_URL=${FBN_BASE_URL}/api \
+        -e FBN_LUMI_URL=${FBN_BASE_URL}/honeycomb \
+        -e FBN_LUSID_IDENTITY_URL=${FBN_BASE_URL}/identity \
+        -e FBN_LUSID_ACCESS_URL=${FBN_BASE_URL}/access \
+        -e FBN_LUSID_DRIVE_URL=${FBN_BASE_URL}/drive \
+        -e FBN_NOTIFICATIONS_URL=${FBN_BASE_URL}/notifications \
+        -e FBN_SCHEDULER_URL=${FBN_BASE_URL}/scheduler2 \
+        -e FBN_INSIGHTS_URL=${FBN_BASE_URL}/insights \
+        -e FBN_CONFIGURATION_URL=${FBN_BASE_URL}/configuration \
         -e FBN_APP_NAME=${FBN_APP_NAME} \
         -e FBN_PASSWORD=${FBN_PASSWORD} \
         -w /usr/src/tests \
