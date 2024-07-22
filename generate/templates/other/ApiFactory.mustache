@@ -60,7 +60,7 @@ namespace {{packageName}}.Extensions
                 if (string.IsNullOrWhiteSpace(apiConfiguration.BaseUrl))
                     throw new ArgumentNullException(
                         nameof(apiConfiguration.BaseUrl),
-                        $"BaseUrl Uri missing. Please specify either FBN_{{#lambda.uppercase}}{{application}}{{/lambda.uppercase}}_API_URL environment variable or {{#lambda.lowercase}}{{application}}{{/lambda.lowercase}}Url in secrets.json.");
+                        $"BaseUrl Uri missing. Please specify either FBN_{{#lambda.uppercase}}{{#lambda.snakecase}}{{applicationShortName}}{{/lambda.snakecase}}{{/lambda.uppercase}}_URL environment variable or {{#lambda.camelcase}}{{applicationShortName}}{{/lambda.camelcase}}Url in secrets.json.");
 
                 throw new UriFormatException($"Invalid Uri: {apiConfiguration.BaseUrl}");
             }

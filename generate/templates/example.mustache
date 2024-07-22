@@ -1,0 +1,60 @@
+```csharp
+using System.Collections.Generic;
+{{#useHttpClient}}
+using System.Net.Http;
+{{/useHttpClient}}
+using {{packageName}}.{{apiPackage}};
+using {{packageName}}.Client;
+using {{packageName}}.Extensions;
+using {{packageName}}.{{modelPackage}};
+using Newtonsoft.Json;
+
+namespace Examples
+{
+    public static class Program
+    {
+        public static void Main()
+        {
+            var secretsFilename = "secrets.json";
+            var path = Path.Combine(Directory.GetCurrentDirectory(), secretsFilename);
+            // Replace with the relevant values
+            File.WriteAllText(
+                path, 
+                @"{
+                    ""api"": {
+                        ""tokenUrl"": ""<your-token-url>"",
+                        ""{{#lambda.camelcase}}{{applicationShortName}}{{/lambda.camelcase}}Url"": ""https://<your-domain>.lusid.com{{basePathWithoutHost}}"",
+                        ""username"": ""<your-username>"",
+                        ""password"": ""<your-password>"",
+                        ""clientId"": ""<your-client-id>"",
+                        ""clientSecret"": ""<your-client-secret>""
+                    }
+                }");
+            var apiInstance = ApiFactoryBuilder.Build(secretsFilename).Api<{{classname}}>();
+            {{#allParams}}
+            {{#isPrimitiveType}}
+            var {{paramName}} = {{{example}}};  // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+            var {{paramName}} = new {{{dataType}}}(); // {{{dataType}}} | {{{description}}}{{^required}} (optional) {{/required}}{{#defaultValue}} (default to {{{.}}}){{/defaultValue}}
+            {{/isPrimitiveType}}
+            {{/allParams}}
+
+            try
+            {
+                {{#summary}}
+                // {{{.}}}
+                {{/summary}}
+                {{#returnType}}{{{.}}} result = {{/returnType}}apiInstance.{{{operationId}}}({{#allParams}}{{paramName}}{{^-last}}, {{/-last}}{{/allParams}});{{#returnType}}
+                Console.WriteLine(JsonConvert.SerializeObject(result, Formatting.Indented));{{/returnType}}
+            }
+            catch (ApiException e)
+            {
+                Console.WriteLine("Exception when calling {{classname}}.{{operationId}}: " + e.Message);
+                Console.WriteLine("Status Code: " + e.ErrorCode);
+                Console.WriteLine(e.StackTrace);
+            }
+        }
+    }
+}
+```

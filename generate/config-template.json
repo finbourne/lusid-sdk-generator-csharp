@@ -2,6 +2,7 @@
   "packageName": "${PACKAGE_NAME}",
   "projectName": "${PROJECT_NAME}",
   "packageVersion": "${ASSEMBLY_VERSION}",
+  "applicationShortName": "${APPLICATION_SHORT_NAME}",
   "packageAuthors": "FINBOURNE Technology Ltd",
   "packageCompany": "FINBOURNE Technology Ltd",
   "packageCopyright": "FINBOURNE Technology Ltd",

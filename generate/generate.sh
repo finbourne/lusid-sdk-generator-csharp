@@ -77,8 +77,6 @@ rm -rf $sdk_output_folder/.openapi-generator
 rm -f $sdk_output_folder/.openapi-generator-ignore
 rm -f $sdk_output_folder/.gitignore
 rm -f $sdk_output_folder/git_push.sh
-rm -f $sdk_output_folder/README.md
-# rm -rf $sdk_output_folder/src
 rm -f $sdk_output_folder/swagger.json
 rm -rf $sdk_output_folder/.github/
 

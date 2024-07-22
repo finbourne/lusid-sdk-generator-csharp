@@ -27,8 +27,9 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             _secretsFile = Path.GetTempFileName();
             _cachedTokenUrl = Environment.GetEnvironmentVariable("FBN_TOKEN_URL") ??
                               Environment.GetEnvironmentVariable("fbn_token_url");
-            _cachedBaseUrl = Environment.GetEnvironmentVariable($"FBN_{APP}_API_URL") ??
-                            Environment.GetEnvironmentVariable($"fbn_{APP.ToLower()}_api_url");
+            _cachedBaseUrl = Environment.GetEnvironmentVariable($"FBN_{APP}_URL") ??
+                             Environment.GetEnvironmentVariable($"FBN_{APP}_API_URL") ??
+                             Environment.GetEnvironmentVariable($"fbn_{APP.ToLower()}_api_url");
             _cachedClientId = Environment.GetEnvironmentVariable("FBN_CLIENT_ID") ??
                               Environment.GetEnvironmentVariable("fbn_client_id");
             _cachedClientSecret = Environment.GetEnvironmentVariable("FBN_CLIENT_SECRET") ??
@@ -45,7 +46,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void TearDown()
         {
             Environment.SetEnvironmentVariable("FBN_TOKEN_URL", _cachedTokenUrl);
-            Environment.SetEnvironmentVariable($"FBN_{APP}_API_URL", _cachedBaseUrl);
+            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", _cachedBaseUrl);
             Environment.SetEnvironmentVariable("FBN_CLIENT_ID", _cachedClientId);
             Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", _cachedClientSecret);
             Environment.SetEnvironmentVariable("FBN_USERNAME", _cachedUsername);
@@ -71,7 +72,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             catch (MissingConfigException e)
             {
                 // note: this test is likely to fail when run locally if you're missing the env variables but they are set on the build server so allowing the failure as well:
-                Assert.AreEqual(e.Message, $"The following required environment variables are not set: ['FBN_TOKEN_URL', 'FBN_USERNAME', 'FBN_PASSWORD', 'FBN_CLIENT_ID', 'FBN_CLIENT_SECRET', 'FBN_{APP}_API_URL']");
+                Assert.AreEqual(e.Message, $"The following required environment variables are not set: ['FBN_TOKEN_URL', 'FBN_USERNAME', 'FBN_PASSWORD', 'FBN_CLIENT_ID', 'FBN_CLIENT_SECRET', 'FBN_{APP}_URL']");
             }
         }
 
@@ -118,7 +119,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void Use_Environment_Variables_If_No_Secrets_File_Provided()
         {
             Environment.SetEnvironmentVariable("FBN_TOKEN_URL", "<env.tokenUrl>");
-            Environment.SetEnvironmentVariable($"FBN_{APP}_API_URL", string.Format("<env.{0}Url>", "test"));
+            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", string.Format("<env.{0}Url>", "test"));
             Environment.SetEnvironmentVariable("FBN_CLIENT_ID", "<env.clientId>");
             Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", "<env.clientSecret>");
             Environment.SetEnvironmentVariable("FBN_USERNAME", "<env.username>");
@@ -141,7 +142,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 Assert.Inconclusive();
             }
             Environment.SetEnvironmentVariable("FBN_TOKEN_URL", "<env.tokenUrl>");
-            Environment.SetEnvironmentVariable($"FBN_{APP}_API_URL", string.Format("<env.{0}Url>", "test"));
+            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", string.Format("<env.{0}Url>", "test"));
             Environment.SetEnvironmentVariable("FBN_CLIENT_ID", "<env.clientId>");
             Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", "");
             Environment.SetEnvironmentVariable("FBN_USERNAME", "<env.username>");
