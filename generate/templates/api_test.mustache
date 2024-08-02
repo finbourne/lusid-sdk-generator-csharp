@@ -81,8 +81,8 @@ namespace {{packageName}}.Test.Api
                 minLength = {{#schema.minLength}}{{schema.minLength}}{{/schema.minLength}}{{^schema.minLength}}0{{/schema.minLength}};
                 maxLength = {{#schema.maxLength}}{{schema.maxLength}}{{/schema.maxLength}}{{^schema.maxLength}}10{{/schema.maxLength}};
                 // the following is necessary to avoid url becoming longer than acceptable length
-                if (maxLength > 20) {
-                    maxLength = 20;
+                if (maxLength > 50) {
+                    maxLength = 50;
                 }
                 count = 0;
                 while (true)
@@ -93,7 +93,7 @@ namespace {{packageName}}.Test.Api
                     {
                         break;
                     }
-                    if (count > 100)
+                    if (count > 10000)
                     {
                         throw new Exception(
                             "unable to generate random value for parameter {{paramName}} which matches the constraints");
@@ -102,7 +102,13 @@ namespace {{packageName}}.Test.Api
                 {{/vendorExtensions.x-regex}}
                 {{^vendorExtensions.x-regex}}
                 {{#isPrimitiveType}}
+                {{#isUuid}}
+                var guidString = {{{example}}}.Contains('_') ? "71beb2cb-be3a-4662-b8ee-e5ded63b957a" : {{{example}}};
+                {{{dataType}}} {{paramName}} = Guid.Parse(guidString);
+                {{/isUuid}}
+                {{^isUuid}}
                 {{{dataType}}} {{paramName}} = {{{example}}};
+                {{/isUuid}}
                 {{/isPrimitiveType}}
                 {{^isPrimitiveType}}
                 {{#content}}
@@ -125,7 +131,12 @@ namespace {{packageName}}.Test.Api
                 }
                 {{/content}}
                 {{^content}}
-                {{{dataType}}} {{paramName}} = JsonConvert.DeserializeObject<{{dataType}}>("""{{{example}}}""");
+                {{#isArray}}
+                {{{dataType}}} {{paramName}} = {{{example}}};
+                {{/isArray}}
+                {{^isArray}}
+                {{{dataType}}} {{paramName}} = JsonConvert.DeserializeObject<{{{dataType}}}>("""{{{example}}}""");
+                {{/isArray}}
                 {{/content}}
                 {{/isPrimitiveType}}
                 {{/vendorExtensions.x-regex}}
