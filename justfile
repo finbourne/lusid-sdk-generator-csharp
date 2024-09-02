@@ -50,7 +50,7 @@ build-docker-images:
 
 generate-local:
     envsubst < generate/config-template.json > generate/.config.json
-    rm -r generate/.output || true
+    rm -rf generate/.output || true
     cp generate/templates/description.{{APPLICATION_SHORT_NAME}}.mustache generate/templates/description.mustache
     docker run \
         -e JAVA_OPTS="-Dlog.level=error" \
@@ -70,6 +70,9 @@ generate-local:
     
     # split the README into two, and move one up a level
     bash generate/split-readme.sh
+
+    # clone the RestSharp fork into the solution
+    git clone https://github.com/finbourne/RestSharp.git generate/.output/sdk/RestSharp
     
 generate TARGET_DIR:
     @just generate-local
@@ -91,6 +94,8 @@ generate-cicd TARGET_DIR:
 
     ./generate/generate.sh ./generate ./generate/.output {{swagger_path}} .config.json
     rm -f generate/.output/.openapi-generator-ignore
+    git clone https://github.com/finbourne/RestSharp.git ./generate/.output/sdk/RestSharp
+    rm -rf ./generate/.output/sdk/RestSharp/.git
 
     # split the README into two, and move one up a level
     bash generate/split-readme.sh
@@ -99,6 +104,7 @@ generate-cicd TARGET_DIR:
     # this prevents deleted content from hanging around indefinitely.
     rm -rf {{TARGET_DIR}}/sdk/${APPLICATION_NAME}
     rm -rf {{TARGET_DIR}}/sdk/docs
+    rm -rf {{TARGET_DIR}}/RestSharp
     
     cp -R generate/.output/. {{TARGET_DIR}}
     echo "copied output to {{TARGET_DIR}}"

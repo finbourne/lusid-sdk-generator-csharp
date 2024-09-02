@@ -403,10 +403,10 @@ namespace {{packageName}}.Client
             {
                 foreach (var pathParam in options.PathParameters)
                 {
-                    var segmentParameter = new UrlSegmentParameter(pathParam.Key, pathParam.Value);
                     // %2F's are replaced in UrlSegmentParameter constructor
                     // we don't want this
-                    request.AddParameter(segmentParameter with {Value = pathParam.Value});
+                    var segmentParameter = new UrlSegmentParameter(pathParam.Key, pathParam.Value, replaceEncodedSlash: false);
+                    request.AddParameter(segmentParameter);
                 }
             }
 
@@ -513,7 +513,7 @@ namespace {{packageName}}.Client
                 }
             }
 
-            request.Timeout = options.TimeoutMs ?? configuration.TimeoutMs;
+            request.Timeout = TimeSpan.FromMilliseconds(options.TimeoutMs ?? configuration.TimeoutMs);
 
             return request;
         }
@@ -580,7 +580,7 @@ namespace {{packageName}}.Client
             {
                 ClientCertificates = configuration.ClientCertificates,
                 CookieContainer = cookies,
-                MaxTimeout = options.TimeoutMs ?? configuration.TimeoutMs,
+                Timeout = TimeSpan.FromMilliseconds(options.TimeoutMs ?? configuration.TimeoutMs),
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent
             };
@@ -611,7 +611,9 @@ namespace {{packageName}}.Client
             if (policy != null)
             {
                 var policyResult = policy.ExecuteAndCapture(() => client.WrappedExecute(req));
+#pragma warning disable CS0618 // Type or member is obsolete
                 response = (policyResult.Outcome == OutcomeType.Successful) ? client.Deserialize<T>(policyResult.Result) : new RestResponse<T>(req)
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     ErrorException = policyResult.FinalException
                 };
@@ -704,7 +706,7 @@ namespace {{packageName}}.Client
             var clientOptions = new RestClientOptions(baseUrl)
             {
                 ClientCertificates = configuration.ClientCertificates,
-                MaxTimeout = options.TimeoutMs ?? configuration.TimeoutMs,
+                Timeout = TimeSpan.FromMilliseconds(options.TimeoutMs ?? configuration.TimeoutMs),
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent
             };
@@ -735,7 +737,7 @@ namespace {{packageName}}.Client
             if (policy != null)
             {
                 var policyResult = await policy.ExecuteAndCaptureAsync((ct) => client.ExecuteAsync(req, ct), cancellationToken).ConfigureAwait(false);
-                response = (policyResult.Outcome == OutcomeType.Successful) ? client.Deserialize<T>(policyResult.Result) : new RestResponse<T>(req)
+                response = (policyResult.Outcome == OutcomeType.Successful) ? await client.Deserialize<T>(policyResult.Result, cancellationToken) : new RestResponse<T>(req)
                 {
                     ErrorException = policyResult.FinalException
                 };

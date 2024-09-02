@@ -68,7 +68,8 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(SdkConfiguration.DefaultTimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(SdkConfiguration.DefaultTimeoutMs));
     }
 
     [Test]
@@ -92,7 +93,8 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(configuration.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(configuration.TimeoutMs));
     }
 
     [Test]
@@ -120,7 +122,8 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(opts.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(opts.TimeoutMs));
     }
     
     [Test]
@@ -148,7 +151,8 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(opts.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(opts.TimeoutMs));
     }
     
     private static ApiClient GetApiClient(
