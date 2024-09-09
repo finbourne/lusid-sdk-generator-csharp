@@ -9,8 +9,6 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     [TestFixture]
     public class ClientCredentialsFlowTokenProviderTest
     {
-        private readonly string AppUrlName = $"{Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToLower()}Url";
-
         [Test]
         public void Constructor_NonNull_Instance_Returned()
         {
@@ -19,8 +17,8 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             {
                 ["api"] = new Dictionary<string, string>()
                 {
-                    {AppUrlName, "https://sub-domain.lusid.com/api"},
-                    {"tokenUrl", "https://sub-domain.okta.com/oauth2/abcd123/v1/token"},
+                    {"TO_BE_REPLACED_LOWERUrl", "https://sub-domain.lusid.com/api"},
+                    {"tokenUrl", "https://sub-domain.lusid.com/oauth2/abcd123/v1/token"},
                     {"clientId", "<clientId>"},
                     {"clientSecret", "<clientSecret>"},
                     {"applicationName", "<applicationName>"},

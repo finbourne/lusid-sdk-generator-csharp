@@ -7,9 +7,6 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     [TestFixture]
     public class ApiConfigurationTest
     {
-
-        private readonly string AppUrlName = $"{Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToLower()}Url";
-
         [Test]
         public void ApiConfiguration_HasMissingConfig_Missing_TokenUrl_Returns_True()
         {
@@ -17,6 +14,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             config.TokenUrl = String.Empty;
             Assert.IsTrue(config.HasMissingConfig());
         }
+
         [Test]
         public void ApiConfiguration_MissingConfig_Missing_TokenUrl_Returns_Correct_String()
         {
@@ -114,7 +112,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             config.BaseUrl = String.Empty;
             List<string> missingList = config.GetMissingConfig();
             Assert.That(missingList.Count, Is.EqualTo(1), "GetMissingConfig list contains one item");
-            Assert.That(missingList[0], Is.EqualTo(AppUrlName), "GetMissingConfig list string correct");
+            Assert.That(missingList[0], Is.EqualTo("TO_BE_REPLACED_LOWERUrl"), "GetMissingConfig list string correct");
         }
 
         [Test]
@@ -154,7 +152,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 ClientId = "name-surname",
                 ClientSecret = "client-secret",
                 Password = "client-password",
-                TokenUrl = "https://lusid-sub-domain.okta.com/oauth2/abcdefg/v1/token",
+                TokenUrl = "https://lusid-sub-domain.lusid.com/oauth2/abcdefg/v1/token",
                 Username = "name-surname@company.com"
             };
         }

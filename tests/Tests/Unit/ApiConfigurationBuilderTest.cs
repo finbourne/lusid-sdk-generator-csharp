@@ -4,154 +4,154 @@ using System.IO;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
+using static System.Environment;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit
 {
     [TestFixture]
     public class ApiConfigurationBuilderTest
     {
-        private readonly string APP = Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToUpper();
-        private readonly string AppUrlName = $"{Environment.GetEnvironmentVariable("FBN_API_TEST_APP_NAME").ToLower()}Url";
         private string _secretsFile;
-        private string _cachedTokenUrl;
-        private string _cachedBaseUrl;
-        private string _cachedClientId;
-        private string _cachedClientSecret;
-        private string _cachedUsername;
-        private string _cachedPassword;
-        private string _cachedApplicationName;
+        private const string TestAppName = "myapp";
+        private const string TestBaseUrl = "https://some-domain.lusid.com";
+        private const string TestTokenUrl = "https://some-domain.identity.lusid.com/oauth2/abc/v1/token";
+        private const string TestUsername = "username";
+        private const string TestPassword = "password";
+        private const string TestClientId = "client-id";
+        private const string TestClientSecret = "client-secret";
+        private const string TestAccessToken = "access-token";
+        private const int TestTimeoutMs = 2000;
+        private const int TestRateLimitRetries = 3;
 
-        [OneTimeSetUp]
-        public void Setup()
+        [SetUp]
+        public void SetUp()
         {
+            ClearEnvironmentVariables();
             _secretsFile = Path.GetTempFileName();
-            _cachedTokenUrl = Environment.GetEnvironmentVariable("FBN_TOKEN_URL") ??
-                              Environment.GetEnvironmentVariable("fbn_token_url");
-            _cachedBaseUrl = Environment.GetEnvironmentVariable($"FBN_{APP}_URL") ??
-                             Environment.GetEnvironmentVariable($"FBN_{APP}_API_URL") ??
-                             Environment.GetEnvironmentVariable($"fbn_{APP.ToLower()}_api_url");
-            _cachedClientId = Environment.GetEnvironmentVariable("FBN_CLIENT_ID") ??
-                              Environment.GetEnvironmentVariable("fbn_client_id");
-            _cachedClientSecret = Environment.GetEnvironmentVariable("FBN_CLIENT_SECRET") ??
-                                  Environment.GetEnvironmentVariable("fbn_client_secret");
-            _cachedUsername = Environment.GetEnvironmentVariable("FBN_USERNAME") ??
-                              Environment.GetEnvironmentVariable("fbn_username");
-            _cachedPassword = Environment.GetEnvironmentVariable("FBN_PASSWORD") ??
-                              Environment.GetEnvironmentVariable("fbn_password");
-            _cachedApplicationName = Environment.GetEnvironmentVariable("FBN_APP_NAME") ??
-                                     Environment.GetEnvironmentVariable("fbn_app_name");
         }
 
-        [OneTimeTearDown]
+        [TearDown]
         public void TearDown()
         {
-            Environment.SetEnvironmentVariable("FBN_TOKEN_URL", _cachedTokenUrl);
-            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", _cachedBaseUrl);
-            Environment.SetEnvironmentVariable("FBN_CLIENT_ID", _cachedClientId);
-            Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", _cachedClientSecret);
-            Environment.SetEnvironmentVariable("FBN_USERNAME", _cachedUsername);
-            Environment.SetEnvironmentVariable("FBN_PASSWORD", _cachedPassword);
-            Environment.SetEnvironmentVariable("FBN_APP_NAME", _cachedApplicationName);
+            ClearEnvironmentVariables();
             File.Delete(_secretsFile);
         }
 
-        [TestCase(null)]
-        [TestCase("invalidFileName.json")]
-        public void Fallback_To_Env_Variables_When_Missing_Secrets_File(string fileName)
+        [Test]
+        public void WhenFileExists_ConfigurationTakenFromFile()
         {
-            try
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                var result = ApiConfigurationBuilder.Build(fileName);
-                if (result.MissingPersonalAccessTokenVariables)
-                {
-                    Assert.Inconclusive();
-                }
-                // assuming env variables are set:
-                Assert.IsFalse(result.HasMissingConfig());
-            }
-            catch (MissingConfigException e)
-            {
-                // note: this test is likely to fail when run locally if you're missing the env variables but they are set on the build server so allowing the failure as well:
-                Assert.AreEqual(e.Message, $"The following required environment variables are not set: ['FBN_TOKEN_URL', 'FBN_USERNAME', 'FBN_PASSWORD', 'FBN_CLIENT_ID', 'FBN_CLIENT_SECRET', 'FBN_{APP}_URL']");
-            }
+                {"applicationName", TestAppName},
+                {"tokenUrl", TestTokenUrl},
+                {"username", TestUsername},
+                {"password", TestPassword},
+                {"clientId", TestClientId},
+                {"clientSecret", TestClientSecret},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
+                {"accessToken", TestAccessToken},
+                {"timeoutMs", TestTimeoutMs},
+                {"rateLimitRetries", TestRateLimitRetries}
+            });
+            
+            // act
+            var config = ApiConfigurationBuilder.Build(_secretsFile);
+
+            // assert
+            AssertExpectedConfigSet(config);
         }
 
         [Test]
-        public void Use_Secrets_File_If_It_Exists()
+        public void WhenOptionsAndFile_OptionsOverrideFileConfig()
         {
-            PopulateDummySecretsFile(new Dictionary<string, string>
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                {"tokenUrl", "<tokenUrl>"},
-                {"username", "<username>"},
-                {"password", "<password>"},
-                {"clientId", "<clientId>"},
-                {"clientSecret", "<clientSecret>"},
-                {AppUrlName, string.Format("<{0}Url>", "test")},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
+                {"accessToken", TestAccessToken},
+                {"timeoutMs", TestTimeoutMs},
+                {"rateLimitRetries", TestRateLimitRetries}
             });
-            var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
-            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
-            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
-            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
-            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
-            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
-            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo(string.Format("<{0}Url>", "test")));
+            
+            // act
+            var opts = new ConfigurationOptions
+            {
+                TimeoutMs = 3000,
+                RateLimitRetries = 4
+            };
+            var config = ApiConfigurationBuilder.Build(_secretsFile, opts);
+        
+            // assert
+            Assert.That(config.TimeoutMs, Is.EqualTo(opts.TimeoutMs));
+            Assert.That(config.RateLimitRetries, Is.EqualTo(opts.RateLimitRetries));
+        }
+    
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("does-not-exist.json")]
+        public void WhenFileDoesNotExist_ConfigurationTakenFromEnvVars(string filename)
+        {
+            // arrange
+            SetDefaultEnvironmentVariables();
+
+            // act
+            var config = ApiConfigurationBuilder.Build(filename);
+        
+            // assert
+            AssertExpectedConfigSet(config);
+        }
+
+        [Test]
+        public void WhenOptionsAndEnvVars_OptionsOverrideEnvVars()
+        {
+            // arrange
+            SetDefaultEnvironmentVariables();
+        
+            // act
+            var opts = new ConfigurationOptions
+            {
+                TimeoutMs = 3000,
+                RateLimitRetries = 4
+            };
+            var config = ApiConfigurationBuilder.Build("", opts);
+        
+            // assert
+            Assert.That(config.TimeoutMs, Is.EqualTo(opts.TimeoutMs));
+            Assert.That(config.RateLimitRetries, Is.EqualTo(opts.RateLimitRetries));
         }
 
         [Test]
         public void Throw_Exception_If_Secrets_File_Incomplete()
         {
-            PopulateDummySecretsFile(new Dictionary<string, string>
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                {"tokenUrl", "<tokenUrl>"},
-                // {"username", "<username>"},
-                {"password", "<password>"},
-                // {"clientId", "<clientId>"},
-                {"clientSecret", "<clientSecret>"},
-                {AppUrlName, string.Format("<{0}Url>", "test")},
+                {"tokenUrl", TestTokenUrl},
+                // {"username", DefaultUsername},
+                {"password", TestPassword},
+                // {"clientId", DefaultClientId},
+                {"clientSecret", TestClientSecret},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
             });
-            var exception = Assert.Throws<MissingConfigException>(() => ApiConfigurationBuilder.Build(_secretsFile));
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(_secretsFile));
             Assert.That(exception.Message,
                 Is.EqualTo(
-                    "The provided secrets file is missing the following required values: ['username', 'clientId']"));
-        }
-
-        [Test]
-        public void Use_Environment_Variables_If_No_Secrets_File_Provided()
-        {
-            Environment.SetEnvironmentVariable("FBN_TOKEN_URL", "<env.tokenUrl>");
-            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", string.Format("<env.{0}Url>", "test"));
-            Environment.SetEnvironmentVariable("FBN_CLIENT_ID", "<env.clientId>");
-            Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", "<env.clientSecret>");
-            Environment.SetEnvironmentVariable("FBN_USERNAME", "<env.username>");
-            Environment.SetEnvironmentVariable("FBN_PASSWORD", "<env.password>");
-            Environment.SetEnvironmentVariable("FBN_APP_NAME", "<env.app_name>");
-            var apiConfiguration = ApiConfigurationBuilder.Build(null);
-            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<env.tokenUrl>"));
-            Assert.That(apiConfiguration.Username, Is.EqualTo("<env.username>"));
-            Assert.That(apiConfiguration.Password, Is.EqualTo("<env.password>"));
-            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<env.clientId>"));
-            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<env.clientSecret>"));
-            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo(string.Format("<env.{0}Url>", "test")));
+                    $"The provided configuration file '{_secretsFile}' is not valid. The following issues were detected: 'api.username' was not set; 'api.clientId' was not set"));
         }
 
         [Test]
         public void Throw_Exception_If_Environment_Variables_Incomplete()
         {
-            if (Environment.GetEnvironmentVariable("FBN_ACCESS_TOKEN") != null)
-            {
-                Assert.Inconclusive();
-            }
-            Environment.SetEnvironmentVariable("FBN_TOKEN_URL", "<env.tokenUrl>");
-            Environment.SetEnvironmentVariable($"FBN_{APP}_URL", string.Format("<env.{0}Url>", "test"));
-            Environment.SetEnvironmentVariable("FBN_CLIENT_ID", "<env.clientId>");
-            Environment.SetEnvironmentVariable("FBN_CLIENT_SECRET", "");
-            Environment.SetEnvironmentVariable("FBN_USERNAME", "<env.username>");
-            Environment.SetEnvironmentVariable("FBN_PASSWORD", "");
-            Environment.SetEnvironmentVariable("FBN_APP_NAME", "<env.app_name>");
-            var exception = Assert.Throws<MissingConfigException>(() => ApiConfigurationBuilder.Build(null));
+            SetEnvironmentVariable("FBN_TOKEN_URL", TestTokenUrl);
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestTokenUrl);
+            SetEnvironmentVariable("FBN_CLIENT_ID", TestClientId);
+            SetEnvironmentVariable("FBN_CLIENT_SECRET", "");
+            SetEnvironmentVariable("FBN_USERNAME", TestUsername);
+            SetEnvironmentVariable("FBN_APP_NAME", TestAppName);
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(null));
             Assert.That(exception.Message,
                 Is.EqualTo(
-                    "The following required environment variables are not set: ['FBN_PASSWORD', 'FBN_CLIENT_SECRET']"));
+                    "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_PASSWORD' was not set; 'FBN_CLIENT_SECRET' was not set"));
         }
 
         [Test]
@@ -159,25 +159,23 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         {
             var settings = new Dictionary<string, string>
             {
-                { "api:TokenUrl", "<tokenUrl>" },
-                { $"api:{AppUrlName}", string.Format("<env.{0}Url>", "test") },
-                { "api:ClientId", "<clientId>" },
-                { "api:ClientSecret", "<clientSecret>" },
-                { "api:Username", "<username>" },
-                { "api:Password", "<password>" },
-                { "api:ApplicationName", "<app_name>" }
+                { "api:TokenUrl", TestTokenUrl },
+                { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
+                { "api:ClientId", TestClientId },
+                { "api:ClientSecret", TestClientSecret },
+                { "api:Username", TestUsername },
+                { "api:Password", TestPassword },
+                { "api:ApplicationName", TestAppName },
+                { "api:AccessToken", TestAccessToken },
+                { "api:TimeoutMs", TestTimeoutMs.ToString() },
+                { "api:RateLimitRetries", TestRateLimitRetries.ToString() },
             };
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(settings)
                 .Build();
             var section = config.GetSection("api");
             var apiConfiguration = ApiConfigurationBuilder.BuildFromConfiguration(section);
-            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
-            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
-            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
-            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
-            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
-            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo(string.Format("<env.{0}Url>", "test")));
+            AssertExpectedConfigSet(apiConfiguration);
         }
 
         [Test]
@@ -192,86 +190,158 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         {
             var settings = new Dictionary<string, string>
             {
-                { "api:TokenUrl", "<tokenUrl>" },
-                { $"api:{AppUrlName}", string.Format("<{0}Url>", "test") },
-                { "api:ClientId", "<clientId>" },
+                { "api:TokenUrl", TestTokenUrl },
+                { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
+                { "api:ClientId", TestClientId },
                 { "api:ClientSecret", "" },
-                { "api:Username", "<username>" },
+                { "api:Username", TestUsername },
                 { "api:Password", "" },
-                { "api:ApplicationName", "<app_name>" }
+                { "api:ApplicationName", TestAppName }
             };
             var config = new ConfigurationBuilder()
                 .AddInMemoryCollection(settings)
                 .Build();
             var section = config.GetSection("api");
-            var exception = Assert.Throws<MissingConfigException>(() => ApiConfigurationBuilder.BuildFromConfiguration(section));
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.BuildFromConfiguration(section));
             Assert.That(exception.Message,
                 Is.EqualTo(
                     "The provided configuration section is missing the following required values: ['Password', 'ClientSecret']"));
         }
 
-        [Test]
-        public void Test_Application_Names_With_UnderScores()
+        [TestCase("TO_BE_REPLACED_LOWERUrl")]
+        [TestCase("PREFIX_LOWER_TO_BE_REPLACED_LOWERUrl")]
+        [TestCase("PREFIX_LOWER-TO_BE_REPLACED_LOWERUrl")]
+        public void Test_Url_Name_Backward_Compatability_From_File(string url)
         {
-            if(!AppUrlName.Contains("_") && !AppUrlName.Contains("-"))
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                Assert.Inconclusive();
-            }
+                {"accessToken", TestAccessToken},
+                {url, TestBaseUrl},
+            });
+
+            // act
+            var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
             
-            string underScoreAppUrlName = AppUrlName.Replace('-','_');
+            // assert
+            Assert.That(apiConfiguration.HasMissingConfig, Is.False);
+            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo(TestBaseUrl));
+        }
+        
+        [TestCase("FBN_TO_BE_REPLACED_UPPER_URL")]
+        [TestCase("FBN_PREFIX_UPPER-TO_BE_REPLACED_UPPER_API_URL")]
+        [TestCase("fbn_PREFIX_LOWER-TO_BE_REPLACED_LOWER_api_url")]
+        [TestCase("FBN_PREFIX_UPPER_TO_BE_REPLACED_UPPER_API_URL")]
+        [TestCase("fbn_PREFIX_LOWER_TO_BE_REPLACED_LOWER_api_url")]
+        public void Test_Url_Name_Backward_Compatability_From_Env_Vars(string url)
+        {
+            // arrange
+            SetEnvironmentVariable(url, TestBaseUrl);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
 
-            PopulateDummySecretsFile(new Dictionary<string, string>
+            // act
+            var apiConfiguration = ApiConfigurationBuilder.Build("");
+            
+            // assert
+            Assert.That(apiConfiguration.HasMissingConfig, Is.False);
+            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo(TestBaseUrl));
+        }
+
+        [TestCase("accessToken")]
+        [TestCase("personalAccessToken")]
+        public void Test_Access_Token_Backward_Compatability_In_File(string accessTokenName)
+        {
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                {"tokenUrl", "<tokenUrl>"},
-                {"username", "<username>"},
-                {"password", "<password>"},
-                {"clientId", "<clientId>"},
-                {"clientSecret", "<clientSecret>"},
-                {underScoreAppUrlName, "<baseUrl>"},
+                {accessTokenName, "test-token"},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
             });
 
+            // act
             var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
-
-            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
-            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
-            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
-            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
-            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
-            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo("<baseUrl>"));
+            
+            // assert
+            Assert.That(apiConfiguration.HasMissingConfig, Is.False);
+            var configuration = ApiFactoryBuilder.Build(_secretsFile).Api<TO_BE_REPLACED_PROJECT_NAME.Api.TEST_API>().Configuration;
+            Assert.That(configuration.AccessToken, Is.EqualTo("test-token"));
         }
 
         [Test]
-        public void Test_Application_Names_With_Dashes()
+        public void Errors_When_Invalid_Timeout_In_File()
         {
-            if(!AppUrlName.Contains("_") && !AppUrlName.Contains("-"))
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
             {
-                Assert.Inconclusive();
-            }
-
-            string dashAppUrlName = AppUrlName.Replace('_','-');
-
-            PopulateDummySecretsFile(new Dictionary<string, string>
-            {
-                {"tokenUrl", "<tokenUrl>"},
-                {"username", "<username>"},
-                {"password", "<password>"},
-                {"clientId", "<clientId>"},
-                {"clientSecret", "<clientSecret>"},
-                {dashAppUrlName, "<baseUrl>"},
+                {"accessToken", TestAccessToken},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
+                {"timeoutMs", 0}
             });
-
-            var apiConfiguration = ApiConfigurationBuilder.Build(_secretsFile);
-
-            Assert.That(apiConfiguration.TokenUrl, Is.EqualTo("<tokenUrl>"));
-            Assert.That(apiConfiguration.Username, Is.EqualTo("<username>"));
-            Assert.That(apiConfiguration.Password, Is.EqualTo("<password>"));
-            Assert.That(apiConfiguration.ClientId, Is.EqualTo("<clientId>"));
-            Assert.That(apiConfiguration.ClientSecret, Is.EqualTo("<clientSecret>"));
-            Assert.That(apiConfiguration.BaseUrl, Is.EqualTo("<baseUrl>"));
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(_secretsFile));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    $"The provided configuration file '{_secretsFile}' is not valid. The following issues were detected: 'api.timeoutMs' must be a positive integer between 1 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_Invalid_RateLimitRetries_In_File()
+        {
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
+            {
+                {"accessToken", TestAccessToken},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
+                {"rateLimitRetries", -1}
+            });
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(_secretsFile));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    $"The provided configuration file '{_secretsFile}' is not valid. The following issues were detected: 'api.rateLimitRetries' must be a positive integer between 0 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_Invalid_Timeout_In_Env_Vars()
+        {
+            // arrange
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestBaseUrl);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
+            SetEnvironmentVariable("FBN_TIMEOUT_MS", "0");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(""));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_TIMEOUT_MS' must be a positive integer between 1 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_Invalid_RateLimitRetries_In_Env_Vars()
+        {
+            // arrange
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestBaseUrl);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
+            SetEnvironmentVariable("FBN_RATE_LIMIT_RETRIES", "-1");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(""));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_RATE_LIMIT_RETRIES' must be a positive integer between 0 and 2147483647"));
         }
 
-
-        private void PopulateDummySecretsFile(Dictionary<string, string> config)
+        private void PopulateDummySecretsFile(Dictionary<string, object> config)
         {
             var secrets = new Dictionary<string, object>
             {
@@ -280,26 +350,47 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var json = JsonSerializer.Serialize(secrets);
             File.WriteAllText(_secretsFile, json);
         }
-
-        class InMemoryConsole : IDisposable
+        
+        private static void ClearEnvironmentVariables()
         {
-            private readonly StringWriter _stringWriter;
-            private readonly TextWriter _originalOutput;
-            public InMemoryConsole()
-            {
-                _stringWriter = new StringWriter();
-                _originalOutput = Console.Out;
-                Console.SetOut(_stringWriter);
-            }
-            public string GetOutput()
-            {
-                return _stringWriter.ToString();
-            }
-            public void Dispose()
-            {
-                Console.SetOut(_originalOutput);
-                _stringWriter.Dispose();
-            }
+            SetEnvironmentVariable("FBN_APP_NAME", null);
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", null);
+            SetEnvironmentVariable("FBN_TOKEN_URL", null);
+            SetEnvironmentVariable("FBN_USERNAME", null);
+            SetEnvironmentVariable("FBN_PASSWORD", null);
+            SetEnvironmentVariable("FBN_CLIENT_ID", null);
+            SetEnvironmentVariable("FBN_CLIENT_SECRET", null);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", null);
+            SetEnvironmentVariable("FBN_TIMEOUT_MS", null);
+            SetEnvironmentVariable("FBN_RATE_LIMIT_RETRIES", null);
+        }
+        
+        private static void SetDefaultEnvironmentVariables()
+        {
+            SetEnvironmentVariable("FBN_APP_NAME", TestAppName);
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestBaseUrl);
+            SetEnvironmentVariable("FBN_TOKEN_URL", TestTokenUrl);
+            SetEnvironmentVariable("FBN_USERNAME", TestUsername);
+            SetEnvironmentVariable("FBN_PASSWORD", TestPassword);
+            SetEnvironmentVariable("FBN_CLIENT_ID", TestClientId);
+            SetEnvironmentVariable("FBN_CLIENT_SECRET", TestClientSecret);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
+            SetEnvironmentVariable("FBN_TIMEOUT_MS", TestTimeoutMs.ToString());
+            SetEnvironmentVariable("FBN_RATE_LIMIT_RETRIES", TestRateLimitRetries.ToString());
+        }
+    
+        private static void AssertExpectedConfigSet(ApiConfiguration config)
+        {
+            Assert.That(config.ApplicationName, Is.EqualTo(TestAppName));
+            Assert.That(config.BaseUrl, Is.EqualTo(TestBaseUrl));
+            Assert.That(config.TokenUrl, Is.EqualTo(TestTokenUrl));
+            Assert.That(config.Username, Is.EqualTo(TestUsername));
+            Assert.That(config.Password, Is.EqualTo(TestPassword));
+            Assert.That(config.ClientId, Is.EqualTo(TestClientId));
+            Assert.That(config.ClientSecret, Is.EqualTo(TestClientSecret));
+            Assert.That(config.PersonalAccessToken, Is.EqualTo(TestAccessToken));
+            Assert.That(config.TimeoutMs, Is.EqualTo(TestTimeoutMs));
+            Assert.That(config.RateLimitRetries, Is.EqualTo(TestRateLimitRetries));
         }
     }
 }

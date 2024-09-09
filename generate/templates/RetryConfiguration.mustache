@@ -1,0 +1,62 @@
+{{>partial_header}}
+
+using System;
+using Polly;
+{{#useRestSharp}}
+using RestSharp;
+{{/useRestSharp}}
+{{#useHttpClient}}
+using System.Net.Http;
+{{/useHttpClient}}
+
+namespace {{packageName}}.Client
+{
+    /// <summary>
+    /// Configuration class to set the polly retry policies to be applied to the requests.
+    /// </summary>
+    public static class RetryConfiguration
+    {
+{{#useRestSharp}}
+        /// <summary>
+        /// Function to return a retry policy for synchronous calls - this will only be used if RetryPolicy is null
+        /// </summary>
+        public static Func<RequestOptions, Policy<RestResponse>>? GetRetryPolicyFunc { get; set; }
+
+        /// <summary>
+        /// Function to return a retry policy for asynchronous calls - this will only be used if AsyncRetryPolicy is null
+        /// </summary>
+        public static Func<RequestOptions, AsyncPolicy<RestResponse>>? GetAsyncRetryPolicyFunc { get; set; }
+        
+        /// <summary>
+        /// Retry policy - if set will be used over any policy returned from GetRetryPolicyFunc
+        /// </summary>
+        public static Policy<RestResponse>? RetryPolicy { get; set; }
+
+        /// <summary>
+        /// Async retry policy - if set will be used over any policy returned from GetAsyncRetryPolicyFunc
+        /// </summary>
+        public static AsyncPolicy<RestResponse>? AsyncRetryPolicy { get; set; }
+{{/useRestSharp}}
+{{#useHttpClient}}
+        /// <summary>
+        /// Function to return a retry policy for synchronous calls - this will only be used if RetryPolicy is null
+        /// </summary>
+        public static Func<RequestOptions, Policy<HttpResponseMessage>>? GetRetryPolicyFunc { get; set; }
+
+        /// <summary>
+        /// Function to return a retry policy for asynchronous calls - this will only be used if AsyncRetryPolicy is null
+        /// </summary>
+        public static Func<RequestOptions, AsyncPolicy<HttpResponseMessage>>? GetAsyncRetryPolicyFunc { get; set; }
+        
+        /// <summary>
+        /// Retry policy - if set will be used over any policy returned from GetRetryPolicyFunc
+        /// </summary>
+        public static Policy<HttpResponseMessage>? RetryPolicy { get; set; }
+
+        /// <summary>
+        /// Async retry policy - if set will be used over any policy returned from GetAsyncRetryPolicyFunc
+        /// </summary>
+        public static AsyncPolicy<HttpResponseMessage>? AsyncRetryPolicy { get; set; }
+{{/useHttpClient}}
+    }
+}
