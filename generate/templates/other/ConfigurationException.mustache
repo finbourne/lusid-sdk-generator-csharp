@@ -1,0 +1,17 @@
+{{>partial_header}}
+
+using System;
+
+namespace {{packageName}}.Extensions
+{
+    /// <summary>
+    /// An exception thrown when config parameters are either missing or invalid
+    /// </summary>
+    public class ConfigurationException : Exception
+    {
+        /// <inheritdoc />
+        public ConfigurationException(string message) : base(message)
+        {
+        }
+    }
+}

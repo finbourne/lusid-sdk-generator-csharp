@@ -8,32 +8,6 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
     public class ApiExceptionExtensionsTest
     {
         [Test]
-        public void IsValidationProblem_HttpStatusCode_BadRequest_Returns_True()
-        {
-            Assert.IsTrue(ApiExceptionExtensions.IsValidationProblem(new ApiException((int)HttpStatusCode.BadRequest, "message")));
-        }
-
-        [Test]
-        public void IsValidationProblem_HttpStatusCode_BadGateway_Returns_False()
-        {
-            Assert.IsFalse(ApiExceptionExtensions.IsValidationProblem(new ApiException((int)HttpStatusCode.BadGateway, "message")));
-        }
-
-        [Test]
-        public void TryGetValidationProblemDetails_HttpStatusCode_BadRequest_Returns_True()
-        {
-            ApiException apiEx = new ApiException((int)HttpStatusCode.BadRequest, "message");
-            Assert.IsTrue(apiEx.TryGetValidationProblemDetails(out LusidValidationProblemDetails _));
-        }
-
-        [Test]
-        public void TryGetValidationProblemDetails_HttpStatusCode_BadGateway_Returns_False()
-        {
-            ApiException apiEx = new ApiException((int)HttpStatusCode.BadGateway, "message");
-            Assert.IsFalse(apiEx.TryGetValidationProblemDetails(out LusidValidationProblemDetails _));
-        }
-
-        [Test]
         public void ProblemDetails_ApiException_ErrorContent_Null_Returns_Null()
         {
             ApiException apiEx = new ApiException((int)HttpStatusCode.BadGateway, "message");

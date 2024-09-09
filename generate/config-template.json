@@ -49,6 +49,14 @@
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "ClientCredentialsFlowTokenProvider.cs"
     },
+    "other/ConfigurationException.mustache": {
+      "folder": "${PROJECT_NAME}/Extensions",
+      "destinationFilename": "ConfigurationException.cs"
+    },
+    "other/ConfigurationOptions.mustache": {
+      "folder": "${PROJECT_NAME}/Extensions",
+      "destinationFilename": "ConfigurationOptions.cs"
+    },
     "other/DateTimeOrCutLabel.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "DateTimeOrCutLabel.cs"
@@ -56,10 +64,6 @@
     "other/ExceptionHandler.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "ExceptionHandler.cs"
-    },
-    "other/MissingConfigException.mustache": {
-      "folder": "${PROJECT_NAME}/Extensions",
-      "destinationFilename": "MissingConfigException.cs"
     },
     "other/PersonalAccessTokenProvider.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",

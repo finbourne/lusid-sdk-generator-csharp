@@ -1,21 +1,15 @@
 using System;
-using System.Threading.Tasks;
 using NUnit.Framework;
 
-namespace Finbourne.Sdk.Extensions.Tests.Unit
+namespace Finbourne.Sdk.Extensions.Tests.Integration
 {
     public class TokenProviderTests
     {
         private static readonly Lazy<ApiConfiguration> ApiConfig =
             new Lazy<ApiConfiguration>(() => ApiConfigurationBuilder.Build("secrets.json"));
         [Test]
-        public async Task CanGetNewTokenWhenRefreshTokenExpired()
+        public async System.Threading.Tasks.Task CanGetNewTokenWhenRefreshTokenExpired()
         {
-            if (ApiConfig.Value.MissingSecretVariables)
-            {
-                Assert.Inconclusive();
-            }
-
             var provider = new ClientCredentialsFlowTokenProvider(ApiConfig.Value);
             var _ = await provider.GetAuthenticationTokenAsync();
             var firstTokenDetails = provider.GetLastToken();

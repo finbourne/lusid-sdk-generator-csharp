@@ -33,6 +33,9 @@ export META_REQUEST_ID_HEADER_KEY := `echo ${META_REQUEST_ID_HEADER_KEY:-lusid-m
 export NUGET_PACKAGE_LOCATION     := `echo ${NUGET_PACKAGE_LOCATION:-~/.nuget/local-packages}`
 export EXCLUDE_TESTS              := `echo ${EXCLUDE_TESTS:-true}`
 export GIT_REPO_NAME              := `echo ${GIT_REPO_NAME:-}`
+export TEST_API                   := `echo ${TEST_API:-ApplicationMetadataApi}`
+export TEST_METHOD                := `echo ${TEST_METHOD:-'ListAccessControlledResources('}`
+export ASYNC_TEST_METHOD          := `echo ${ASYNC_TEST_METHOD:-'ListAccessControlledResourcesAsync('}`
 
 swagger_path := "./swagger.json"
 
@@ -145,34 +148,59 @@ generate-and-publish-cicd OUT_DIR:
     @just generate-cicd {{OUT_DIR}}
     @just publish-cicd {{OUT_DIR}}
 
+add-tests SDK_DIR:
+    bash tests/add-tests.sh {{SDK_DIR}}
+
+test-cicd SDK_DIR:
+    @just add-tests {{SDK_DIR}}
+    bash tests/run-tests.sh {{SDK_DIR}}/sdk "${PROJECT_NAME}/${PROJECT_NAME}.csproj"
+
 test-local:
     @just generate-local
-    docker run \
+    @just add-tests {{justfile_directory()}}/generate/.output
+    FBN_LUSID_URL=${FBN_BASE_URL}/api \
+        FBN_LUMINESCE_URL=${FBN_BASE_URL}/honeycomb \
+        FBN_IDENTITY_URL=${FBN_BASE_URL}/identity \
+        FBN_ACCESS_URL=${FBN_BASE_URL}/access \
+        FBN_DRIVE_URL=${FBN_BASE_URL}/drive \
+        FBN_NOTIFICATIONS_URL=${FBN_BASE_URL}/notifications \
+        FBN_SCHEDULER_URL=${FBN_BASE_URL}/scheduler2 \
+        FBN_INSIGHTS_URL=${FBN_BASE_URL}/insights \
+        FBN_CONFIGURATION_URL=${FBN_BASE_URL}/configuration \
+        FBN_WORKFLOW_URL=${FBN_BASE_URL}/workflow \
+        FBN_HORIZON_URL=${FBN_BASE_URL}/horizon \
+        bash tests/run-tests.sh generate/.output/sdk "${PROJECT_NAME}/${PROJECT_NAME}.csproj"
+
+test-local-docker:
+    @just generate-local
+    @just add-tests {{justfile_directory()}}/generate/.output
+    cp {{justfile_directory()}}/tests/run-tests.sh generate/.output/sdk/run-tests.sh
+    docker run --rm \
+        -e PACKAGE_NAME=${PACKAGE_NAME} \
         -e PROJECT_NAME=${PROJECT_NAME} \
-        -e FBN_API_TEST_APP_NAME=${APPLICATION_NAME} \
-        -e GIT_REPO_NAME=${GIT_REPO_NAME} \
+        -e FBN_APP_NAME=${FBN_APP_NAME} \
         -e FBN_TOKEN_URL=${FBN_TOKEN_URL} \
-        -e FBN_ACCESS_TOKEN=${FBN_ACCESS_TOKEN} \
         -e FBN_USERNAME=${FBN_USERNAME} \
+        -e FBN_PASSWORD=${FBN_PASSWORD} \
         -e FBN_CLIENT_ID=${FBN_CLIENT_ID} \
         -e FBN_CLIENT_SECRET=${FBN_CLIENT_SECRET} \
+        -e FBN_ACCESS_TOKEN=${FBN_ACCESS_TOKEN} \
         -e FBN_LUSID_URL=${FBN_BASE_URL}/api \
-        -e FBN_LUMI_URL=${FBN_BASE_URL}/honeycomb \
-        -e FBN_LUSID_IDENTITY_URL=${FBN_BASE_URL}/identity \
-        -e FBN_LUSID_ACCESS_URL=${FBN_BASE_URL}/access \
+        -e FBN_LUMINESCE_URL=${FBN_BASE_URL}/honeycomb \
+        -e FBN_IDENTITY_URL=${FBN_BASE_URL}/identity \
+        -e FBN_ACCESS_URL=${FBN_BASE_URL}/access \
         -e FBN_LUSID_DRIVE_URL=${FBN_BASE_URL}/drive \
         -e FBN_NOTIFICATIONS_URL=${FBN_BASE_URL}/notifications \
         -e FBN_SCHEDULER_URL=${FBN_BASE_URL}/scheduler2 \
         -e FBN_INSIGHTS_URL=${FBN_BASE_URL}/insights \
         -e FBN_CONFIGURATION_URL=${FBN_BASE_URL}/configuration \
-        -e FBN_APP_NAME=${FBN_APP_NAME} \
-        -e FBN_PASSWORD=${FBN_PASSWORD} \
-        -w /usr/src/tests \
-        -v $(pwd)/generate/.output/sdk/:/usr/src/sdk/ \
-        -v $(pwd)/tests/:/usr/src/tests/ \
-        mcr.microsoft.com/dotnet/sdk:6.0 bash -- run-tests.sh
+        -e FBN_WORKFLOW_URL=${FBN_BASE_URL}/workflow \
+        -e FBN_HORIZON_URL=${FBN_BASE_URL}/horizon \
+        -w /usr/src/sdk \
+        -v $(pwd)/generate/.output/sdk:/usr/src/sdk \
+        mcr.microsoft.com/dotnet/sdk:6.0 bash run-tests.sh /usr/src/sdk "${PROJECT_NAME}/${PROJECT_NAME}.csproj"
 
 get-templates:
-    docker run \
+    docker run --rm \
         -v {{justfile_directory()}}/.templates:/usr/src/out \
         finbourne/lusid-sdk-gen-csharp:latest author template -g csharp-netcore 
