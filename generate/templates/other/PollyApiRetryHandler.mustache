@@ -67,7 +67,7 @@ namespace {{packageName}}.Extensions
         /// </summary>
         public static readonly PolicyWrap<RestResponse> DefaultRetryPolicyWithFallback =
             // Order of wraps matters. We must wrap the retry policy ON the fallback policy, not the other way around.
-            DefaultFallbackPolicy.Wrap(DefaultRetryPolicyWithRateLimit);
+            DefaultFallbackPolicy.Wrap(DefaultRetryPolicy);
 
         /// <summary>
         /// Combines DefaultFallbackPolicy and GetDefaultRetryPolicyWithRateLimit.
@@ -102,7 +102,7 @@ namespace {{packageName}}.Extensions
         public static Policy<RestResponse> DefaultRetryPolicy =>
             Policy
                 .HandleResult<RestResponse>(GetPollyRetryCondition)
-                .Retry(retryCount: SdkConfiguration.DefaultRateLimitRetries, onRetry: HandleRetryAction);
+                .Retry(retryCount: DefaultNumberOfRetries, onRetry: HandleRetryAction);
 
         /// <summary>
         /// Retry policy wrap that handles rate limit codes (409) as well as the default retry policy.
@@ -143,7 +143,7 @@ namespace {{packageName}}.Extensions
         /// Use .WrapAsync() method to combine this policy with your other custom policies
         /// </summary>
         public static readonly AsyncPolicyWrap<RestResponse> DefaultRetryPolicyWithFallbackAsync =
-            GetDefaultRetryPolicyWithRateLimitRetryWithFallbackAsync(DefaultNumberOfRetries);
+            DefaultFallbackPolicyAsync.WrapAsync(DefaultRetryPolicyAsync);
 
         /// <summary>
         /// Combines DefaultFallbackPolicyAsync and GetAsyncDefaultRetryPolicyWithRateLimit.
@@ -163,7 +163,7 @@ namespace {{packageName}}.Extensions
         public static AsyncPolicy<RestResponse> DefaultRetryPolicyAsync =>
             Policy
                 .HandleResult<RestResponse>(GetPollyRetryCondition)
-                .RetryAsync(retryCount: GlobalConfiguration.Instance.RateLimitRetries, onRetry: HandleRetryAction);
+                .RetryAsync(retryCount: DefaultNumberOfRetries, onRetry: HandleRetryAction);
 
         /// <summary>
         /// Defines async policy for handling rate limit (429) http response codes.

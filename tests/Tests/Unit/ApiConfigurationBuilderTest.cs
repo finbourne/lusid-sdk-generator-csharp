@@ -179,6 +179,35 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         }
 
         [Test]
+        public void WhenOptionsAndConfigSection_OptionsOverrideConfigSection()
+        {
+            // arrange
+            var settings = new Dictionary<string, string>
+            {
+                { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
+                { "api:AccessToken", TestAccessToken },
+                { "api:TimeoutMs", TestTimeoutMs.ToString() },
+                { "api:RateLimitRetries", TestRateLimitRetries.ToString() },
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(settings)
+                .Build();
+            var section = config.GetSection("api");
+            var opts = new ConfigurationOptions
+            {
+                TimeoutMs = 3000,
+                RateLimitRetries = 4
+            };
+            
+            // act
+            var apiConfiguration = ApiConfigurationBuilder.BuildFromConfiguration(section, opts);
+            
+            // assert
+            Assert.That(apiConfiguration.TimeoutMs, Is.EqualTo(3000));
+            Assert.That(apiConfiguration.RateLimitRetries, Is.EqualTo(4));
+        }
+
+        [Test]
         public void Throw_Exception_If_Configuration_Section_Is_Null()
         {
             var exception = Assert.Throws<ArgumentNullException>(() => ApiConfigurationBuilder.BuildFromConfiguration(null));
@@ -193,7 +222,6 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 { "api:TokenUrl", TestTokenUrl },
                 { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
                 { "api:ClientId", TestClientId },
-                { "api:ClientSecret", "" },
                 { "api:Username", TestUsername },
                 { "api:Password", "" },
                 { "api:ApplicationName", TestAppName }
@@ -205,7 +233,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.BuildFromConfiguration(section));
             Assert.That(exception.Message,
                 Is.EqualTo(
-                    "The provided configuration section is missing the following required values: ['Password', 'ClientSecret']"));
+                    "The provided configuration section is not valid. The following issues were detected: 'Password' was not set; 'ClientSecret' was not set"));
         }
 
         [TestCase("TO_BE_REPLACED_LOWERUrl")]
@@ -266,6 +294,74 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var configuration = ApiFactoryBuilder.Build(_secretsFile).Api<TO_BE_REPLACED_PROJECT_NAME.Api.TEST_API>().Configuration;
             Assert.That(configuration.AccessToken, Is.EqualTo("test-token"));
         }
+        
+        [Test]
+        public void Errors_When_Invalid_Timeout_In_Section()
+        {
+            // arrange
+            PopulateDummySecretsFile(new Dictionary<string, object>
+            {
+                {"accessToken", TestAccessToken},
+                {"TO_BE_REPLACED_LOWERUrl", TestBaseUrl},
+                {"timeoutMs", 0}
+            });
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(_secretsFile));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    $"The provided configuration file '{_secretsFile}' is not valid. The following issues were detected: 'api.timeoutMs' must be a positive integer between 1 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_Invalid_Timeout_In_Config_Section()
+        {
+            // arrange
+            var settings = new Dictionary<string, string>
+            {
+                { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
+                { "api:AccessToken", TestAccessToken },
+                { "api:TimeoutMs", "0" },
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(settings)
+                .Build();
+            var section = config.GetSection("api");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.BuildFromConfiguration(section));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    "The provided configuration section is not valid. The following issues were detected: 'TimeoutMs' must be a positive integer between 1 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_Invalid_RateLimitRetry_In_Config_Section()
+        {
+            // arrange
+            var settings = new Dictionary<string, string>
+            {
+                { "api:TO_BE_REPLACED_LOWERUrl", TestBaseUrl },
+                { "api:AccessToken", TestAccessToken },
+                { "api:RateLimitRetries", "-1" },
+            };
+            var config = new ConfigurationBuilder()
+                .AddInMemoryCollection(settings)
+                .Build();
+            var section = config.GetSection("api");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.BuildFromConfiguration(section));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    $"The provided configuration section is not valid. The following issues were detected: 'RateLimitRetries' must be a positive integer between 0 and 2147483647"));
+        }
 
         [Test]
         public void Errors_When_Invalid_Timeout_In_File()
@@ -325,6 +421,23 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         }
         
         [Test]
+        public void Errors_When_NonInteger_Timeout_In_Env_Vars()
+        {
+            // arrange
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestBaseUrl);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
+            SetEnvironmentVariable("FBN_TIMEOUT_MS", "one");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(""));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_TIMEOUT_MS' is not a valid integer"));
+        }
+        
+        [Test]
         public void Errors_When_Invalid_RateLimitRetries_In_Env_Vars()
         {
             // arrange
@@ -339,6 +452,23 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             Assert.That(exception.Message,
                 Is.EqualTo(
                     "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_RATE_LIMIT_RETRIES' must be a positive integer between 0 and 2147483647"));
+        }
+        
+        [Test]
+        public void Errors_When_NonInteger_RateLimitRetries_In_Env_Vars()
+        {
+            // arrange
+            SetEnvironmentVariable("FBN_TO_BE_REPLACED_UPPER_URL", TestBaseUrl);
+            SetEnvironmentVariable("FBN_ACCESS_TOKEN", TestAccessToken);
+            SetEnvironmentVariable("FBN_RATE_LIMIT_RETRIES", "zero");
+            
+            // act
+            var exception = Assert.Throws<ConfigurationException>(() => ApiConfigurationBuilder.Build(""));
+            
+            // assert
+            Assert.That(exception.Message,
+                Is.EqualTo(
+                    "Configuration parameters are not valid. The following issues were detected with the environment variables set: 'FBN_RATE_LIMIT_RETRIES' is not a valid integer"));
         }
 
         private void PopulateDummySecretsFile(Dictionary<string, object> config)

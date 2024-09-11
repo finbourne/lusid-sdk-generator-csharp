@@ -315,6 +315,7 @@ namespace {{packageName}}.Client
         /// <param name="basePath">The target service's base path in URL format.</param>
         /// <param name="CreateHttpMessageHandler">A function to create a HttpMessageHandler for each REST request</param>
         /// <param name="disposeHandler">Should the HttpMessageHandler be disposed of after each request</param>
+        /// <param name="createRestClientFunc">A function that given configuration will return an implementation of the IRestClientWrapper interface. Use to override the default RestClient</param>
         /// <exception cref="ArgumentException"></exception>
         public ApiClient(string basePath, Func<RestClientOptions, HttpMessageHandler>? CreateHttpMessageHandler = null, bool disposeHandler = true, Func<RestClientOptions, IReadableConfiguration, IRestClientWrapper> createRestClientFunc = null){
             if (string.IsNullOrEmpty(basePath))
@@ -512,7 +513,7 @@ namespace {{packageName}}.Client
                 }
             }
 
-            request.Timeout = options.Timeout ?? configuration.TimeoutMs;
+            request.Timeout = options.TimeoutMs ?? configuration.TimeoutMs;
 
             return request;
         }
@@ -579,7 +580,7 @@ namespace {{packageName}}.Client
             {
                 ClientCertificates = configuration.ClientCertificates,
                 CookieContainer = cookies,
-                MaxTimeout = options.Timeout ?? configuration.TimeoutMs,
+                MaxTimeout = options.TimeoutMs ?? configuration.TimeoutMs,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent
             };
@@ -606,7 +607,7 @@ namespace {{packageName}}.Client
 
             RestResponse<T> response;
 
-            var policy = GetSyncPolicy<T>(options);
+            var policy = GetSyncPolicy(options);
             if (policy != null)
             {
                 var policyResult = policy.ExecuteAndCapture(() => client.WrappedExecute(req));
@@ -686,9 +687,8 @@ namespace {{packageName}}.Client
         /// Returns the policy configured for executing synchronous requests
         /// </summary>
         /// <param name="options"></param>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static Policy<RestResponse>? GetSyncPolicy<T>(RequestOptions options)
+        public static Policy<RestResponse>? GetSyncPolicy(RequestOptions options)
         {
             Policy<RestResponse>? policy = RetryConfiguration.RetryPolicy ?? (RetryConfiguration.GetRetryPolicyFunc == null
                 ? null
@@ -704,7 +704,7 @@ namespace {{packageName}}.Client
             var clientOptions = new RestClientOptions(baseUrl)
             {
                 ClientCertificates = configuration.ClientCertificates,
-                MaxTimeout = options.Timeout ?? configuration.TimeoutMs,
+                MaxTimeout = options.TimeoutMs ?? configuration.TimeoutMs,
                 Proxy = configuration.Proxy,
                 UserAgent = configuration.UserAgent
             };
@@ -730,7 +730,7 @@ namespace {{packageName}}.Client
 
             RestResponse<T> response;
         {{#supportsRetry}}
-            var policy = GetAsyncPolicy<T>(options);
+            var policy = GetAsyncPolicy(options);
             
             if (policy != null)
             {
@@ -803,9 +803,8 @@ namespace {{packageName}}.Client
         /// Returns the policy configured for executing asynchronous requests
         /// </summary>
         /// <param name="options"></param>
-        /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static AsyncPolicy<RestResponse>? GetAsyncPolicy<T>(RequestOptions options)
+        public static AsyncPolicy<RestResponse>? GetAsyncPolicy(RequestOptions options)
         {
             AsyncPolicy<RestResponse>? policy = RetryConfiguration.AsyncRetryPolicy ?? (RetryConfiguration.GetAsyncRetryPolicyFunc == null
                 ? null

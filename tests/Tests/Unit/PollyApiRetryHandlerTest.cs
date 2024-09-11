@@ -1,6 +1,5 @@
 using System;
 using System.Net;
-using TO_BE_REPLACED_PROJECT_NAME.Api;
 using NUnit.Framework;
 using Polly;
 using RestSharp;
@@ -47,12 +46,43 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             AssertExpectedSyncPolicyBehaviour(statusCode, expectedTimesCalled);
         }
 
-        private static void AssertExpectedSyncPolicyBehaviour(HttpStatusCode statusCode, int expectedTimesCalled)
+        [Test]
+        public void SyncRequest_UsesConfigurationFromSdkConfiguration_OnRateLimiting()
+        {
+            var statusCode = HttpStatusCode.TooManyRequests;
+            var configuration = new SdkConfiguration
+            {
+                RateLimitRetries = 1
+            };
+            var expectedTimesCalled = configuration.RateLimitRetries + 1;
+            AssertExpectedSyncPolicyBehaviour(statusCode, expectedTimesCalled, configuration);
+        }
+
+        [Test]
+        public void SyncRequest_RequestOptionsOverrideSdkConfiguration_OnRateLimiting()
+        {
+            var statusCode = HttpStatusCode.TooManyRequests;
+            var configuration = new SdkConfiguration
+            {
+                RateLimitRetries = 4
+            };
+            var requestOptions = new RequestOptions
+            {
+                RateLimitRetries = 1
+            };
+            var expectedTimesCalled = requestOptions.RateLimitRetries.Value + 1;
+            AssertExpectedSyncPolicyBehaviour(statusCode, expectedTimesCalled, configuration, requestOptions);
+        }
+
+        private static void AssertExpectedSyncPolicyBehaviour(
+            HttpStatusCode statusCode, 
+            int expectedTimesCalled, 
+            SdkConfiguration configuration = null,
+            RequestOptions requestOptions = null)
         {
             // act
-            new ApiFactory(new SdkConfiguration());
-            var requestOptions = new RequestOptions();
-            Policy<RestResponse> policy = ApiClient.GetSyncPolicy<TEST_API>(requestOptions);
+            new ApiFactory(configuration ?? new SdkConfiguration());
+            Policy<RestResponse> policy = ApiClient.GetSyncPolicy(requestOptions ?? new RequestOptions());
             
             // assert
             Assert.That(policy, Is.Not.Null);
@@ -80,7 +110,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             new ApiFactory(new SdkConfiguration());
 
             // assert
-            var policy = ApiClient.GetSyncPolicy<RestResponse>(new RequestOptions());
+            var policy = ApiClient.GetSyncPolicy(new RequestOptions());
             Assert.That(policy, Is.EqualTo(testPolicy));
         }
         
@@ -100,7 +130,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             
             // assert
             Assert.That(testPolicy1, Is.Not.EqualTo(testPolicy2));
-            Assert.That(ApiClient.GetSyncPolicy<RestResponse>(new RequestOptions()), Is.EqualTo(testPolicy1));
+            Assert.That(ApiClient.GetSyncPolicy(new RequestOptions()), Is.EqualTo(testPolicy1));
         }
         
         [Test]
@@ -114,7 +144,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             new ApiFactory(new SdkConfiguration());
             
             // assert
-            var syncPolicy = ApiClient.GetSyncPolicy<RestResponse>(new RequestOptions());
+            var syncPolicy = ApiClient.GetSyncPolicy(new RequestOptions());
             Assert.That(syncPolicy, Is.EqualTo(testPolicy2));
         }
 
@@ -135,13 +165,44 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             
             await AssertExpectedAsyncPolicyBehaviour(statusCode, expectedTimesCalled);
         }
+        
+        [Test]
+        public void AsyncRequest_UsesConfigurationFromSdkConfiguration_OnRateLimiting()
+        {
+            var statusCode = HttpStatusCode.TooManyRequests;
+            var configuration = new SdkConfiguration
+            {
+                RateLimitRetries = 1
+            };
+            var expectedTimesCalled = configuration.RateLimitRetries + 1;
+            AssertExpectedSyncPolicyBehaviour(statusCode, expectedTimesCalled, configuration);
+        }
 
-        private static async System.Threading.Tasks.Task AssertExpectedAsyncPolicyBehaviour(HttpStatusCode statusCode, int expectedTimesCalled)
+        [Test]
+        public void AsyncRequest_RequestOptionsOverrideSdkConfiguration_OnRateLimiting()
+        {
+            var statusCode = HttpStatusCode.TooManyRequests;
+            var configuration = new SdkConfiguration
+            {
+                RateLimitRetries = 4
+            };
+            var requestOptions = new RequestOptions
+            {
+                RateLimitRetries = 1
+            };
+            var expectedTimesCalled = requestOptions.RateLimitRetries.Value + 1;
+            AssertExpectedSyncPolicyBehaviour(statusCode, expectedTimesCalled, configuration, requestOptions);
+        }
+
+        private static async System.Threading.Tasks.Task AssertExpectedAsyncPolicyBehaviour(
+            HttpStatusCode statusCode, 
+            int expectedTimesCalled,
+            SdkConfiguration configuration = null,
+            RequestOptions requestOptions = null)
         {
             // act
-            new ApiFactory(new SdkConfiguration());
-            var requestOptions = new RequestOptions();
-            AsyncPolicy<RestResponse> policy = ApiClient.GetAsyncPolicy<TEST_API>(requestOptions);
+            new ApiFactory(configuration ?? new SdkConfiguration());
+            AsyncPolicy<RestResponse> policy = ApiClient.GetAsyncPolicy(requestOptions ?? new RequestOptions());
             
             // assert
             Assert.That(policy, Is.Not.Null);
@@ -169,7 +230,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             new ApiFactory(new SdkConfiguration());
 
             // assert
-            var policy = ApiClient.GetAsyncPolicy<RestResponse>(new RequestOptions());
+            var policy = ApiClient.GetAsyncPolicy(new RequestOptions());
             Assert.That(policy, Is.EqualTo(testPolicy));
         }
 
@@ -189,7 +250,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             
             // assert
             Assert.That(testPolicy1, Is.Not.EqualTo(testPolicy2));
-            Assert.That(ApiClient.GetAsyncPolicy<RestResponse>(new RequestOptions()), Is.EqualTo(testPolicy1));
+            Assert.That(ApiClient.GetAsyncPolicy(new RequestOptions()), Is.EqualTo(testPolicy1));
         }
         
         [Test]
@@ -203,7 +264,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             new ApiFactory(new SdkConfiguration());
             
             // assert
-            var asyncPolicy = ApiClient.GetAsyncPolicy<RestResponse>(new RequestOptions());
+            var asyncPolicy = ApiClient.GetAsyncPolicy(new RequestOptions());
             Assert.That(asyncPolicy, Is.EqualTo(testPolicy2));
         }
     }

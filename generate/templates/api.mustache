@@ -146,9 +146,15 @@ namespace {{packageName}}.{{apiPackage}}
         /// <returns></returns>
         public {{classname}}(string basePath)
         {
+            var globalConfiguration = {{packageName}}.Client.GlobalConfiguration.Instance;
             this.Configuration = {{packageName}}.Client.Configuration.MergeConfigurations(
-                {{packageName}}.Client.GlobalConfiguration.Instance,
-                new {{packageName}}.Client.Configuration { BasePath = basePath }
+                globalConfiguration,
+                new {{packageName}}.Client.Configuration
+                {
+                    BasePath = basePath,
+                    TimeoutMs = globalConfiguration.TimeoutMs,
+                    RateLimitRetries = globalConfiguration.RateLimitRetries
+                }
             );
             this.Client = new {{packageName}}.Client.ApiClient(this.Configuration.BasePath);
             {{#supportsAsync}}
@@ -288,7 +294,7 @@ namespace {{packageName}}.{{apiPackage}}
 
             if (opts is { TimeoutMs: not null })
             {
-                localVarRequestOptions.Timeout = opts.TimeoutMs.Value;
+                localVarRequestOptions.TimeoutMs = opts.TimeoutMs.Value;
             }
             
             if (opts is { RateLimitRetries: not null })
@@ -572,7 +578,7 @@ namespace {{packageName}}.{{apiPackage}}
 
             if (opts is { TimeoutMs: not null })
             {
-                localVarRequestOptions.Timeout = opts.TimeoutMs.Value;
+                localVarRequestOptions.TimeoutMs = opts.TimeoutMs.Value;
             }
             
             if (opts is { RateLimitRetries: not null })

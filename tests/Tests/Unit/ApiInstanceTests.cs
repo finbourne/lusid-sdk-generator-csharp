@@ -206,4 +206,33 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(expectedNumberOfRetries + 1));
     }
+
+    [Test]
+    public void GlobalConfigUsedIfNoConfigurationPassed()
+    {
+        // Arrange
+        GlobalConfiguration.Instance = new SdkConfiguration
+        {
+            TimeoutMs = 1003,
+            RateLimitRetries = 8
+        };
+        
+        // Act
+        var configuration = new TEST_API("http://localhost").Configuration;
+        
+        // Assert
+        Assert.That(configuration.TimeoutMs, Is.EqualTo(1003));
+        Assert.That(configuration.RateLimitRetries, Is.EqualTo(8));
+    }
+
+    [Test]
+    public void DefaultsUsed_WhenNoConfigurationAndNoGlobalConfigurationSet()
+    {
+        // Act
+        var configuration = new TEST_API("http://localhost").Configuration;
+        
+        // Assert
+        Assert.That(configuration.TimeoutMs, Is.EqualTo(SdkConfiguration.DefaultTimeoutMs));
+        Assert.That(configuration.RateLimitRetries, Is.EqualTo(SdkConfiguration.DefaultRateLimitRetries));
+    }
 }

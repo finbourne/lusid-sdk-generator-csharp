@@ -279,14 +279,36 @@ namespace {{packageName}}.Client
         }
 
         /// <summary>
+        /// Exists for backwards compatibility, use TimeoutMs instead
+        /// </summary>
+        public virtual int Timeout
+        {
+            get => TimeoutMs;
+            set => TimeoutMs = value;
+        }
+
+        /// <summary>
         /// Gets or sets the default headers.
         /// </summary>
         public virtual IDictionary<string, string> DefaultHeaders { get; set; }
 
+        private int _timeoutMs;
+
         /// <summary>
-        /// Gets or sets the HTTP timeout (milliseconds) of ApiClient. Default to 30 minutes.
+        /// Gets or sets the HTTP timeout (milliseconds) of the client. Defaults to <see cref="DefaultTimeoutMs"/>
         /// </summary>
-        public virtual int TimeoutMs { get; set; }
+        /// <exception cref="ArgumentException"></exception>
+        public virtual int TimeoutMs
+        {
+            get => _timeoutMs;
+            set {
+                if (value < 1)
+                {
+                    throw new ArgumentException($"{nameof(TimeoutMs)} must be a positive integer between 1 and {int.MaxValue}");
+                }
+                _timeoutMs = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the proxy
@@ -630,7 +652,7 @@ namespace {{packageName}}.Client
         private int _rateLimitRetries;
 
         /// <summary>
-        /// 
+        /// The number of retries when being rate limited. Defaults to <see cref="DefaultRateLimitRetries"/>
         /// </summary>
         /// <exception cref="ArgumentException"></exception>
         public virtual int RateLimitRetries

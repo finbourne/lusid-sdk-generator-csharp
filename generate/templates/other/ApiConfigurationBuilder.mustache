@@ -71,13 +71,39 @@ namespace {{packageName}}.Extensions
 
             apiConfig = CheckBaseUrl(apiConfig);
 
+            var errors = new List<string>();
             if (apiConfig.HasMissingConfig())
             {
-                var missingValues = apiConfig.GetMissingConfig()
-                    .Select(value => $"'{value}'");
-                var message = $"[{string.Join(", ", missingValues)}]";
-                throw new ConfigurationException(
-                    $"The provided configuration section is missing the following required values: {message}");
+                errors.AddRange(apiConfig.GetMissingConfig()
+                    .Select(value => $"'{value}' was not set"));
+            }
+            
+            if (opts != null)
+            {
+                if (opts.TimeoutMs != null)
+                {
+                    apiConfig.TimeoutMs = opts.TimeoutMs;
+                }
+
+                if (opts.RateLimitRetries != null)
+                {
+                    apiConfig.RateLimitRetries = opts.RateLimitRetries;
+                }
+            }
+            
+            if (apiConfig.TimeoutMs is < 1)
+            {
+                errors.Add($"'{nameof(apiConfig.TimeoutMs)}' must be a positive integer between 1 and {int.MaxValue}");
+            }
+                
+            if (apiConfig.RateLimitRetries is < 0)
+            {
+                errors.Add($"'{nameof(apiConfig.RateLimitRetries)}' must be a positive integer between 0 and {int.MaxValue}");
+            }
+
+            if (errors.Any())
+            {
+                throw new ConfigurationException($"The provided configuration section is not valid. The following issues were detected: {string.Join("; ", errors)}");
             }
             
             return apiConfig;
