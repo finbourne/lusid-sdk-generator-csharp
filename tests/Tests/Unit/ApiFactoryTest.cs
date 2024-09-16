@@ -1,6 +1,7 @@
 using Lusid.Sdk.Api;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit
 {
@@ -59,6 +60,29 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var apiFactory = new ApiFactory(apiConfig);
             Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, Does.ContainKey("X-LUSID-Application"));
             Assert.AreEqual(appName, apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders["X-LUSID-Application"]);
+        }
+
+        [Test]
+        public void HeadersProvided()
+        {
+            string key = "key_name";
+            var config = new TokenProviderConfiguration(null);
+           
+            var testHeaders = new Dictionary<string, string>() {{key, "testHeader"}};
+            int timeOut = 3000;
+            var apiFactory = new ApiFactory(config, testHeaders, timeOut);
+            Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, Does.ContainKey(key));
+
+        }
+
+        [Test]
+        public void NullHeadersProvided()
+        {
+            string key = "key_name";
+            var config = new TokenProviderConfiguration(null);
+            var apiFactory = new ApiFactory(config, null, null);
+            Assert.That(apiFactory.Api<ApplicationMetadataApi>().Configuration.DefaultHeaders, !Does.ContainKey(key));
+
         }
     }
 }
