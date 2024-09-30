@@ -72,7 +72,7 @@ generate-local:
     bash generate/split-readme.sh
 
     # clone the RestSharp fork into the solution
-    git clone https://github.com/finbourne/RestSharp.git generate/.output/sdk/RestSharp
+    # git clone git@gitlab.com:finbourne/ctools/sdk-core.git generate/.output/sdk/RestSharp
     
 generate TARGET_DIR:
     @just generate-local
@@ -94,7 +94,7 @@ generate-cicd TARGET_DIR:
 
     ./generate/generate.sh ./generate ./generate/.output {{swagger_path}} .config.json
     rm -f generate/.output/.openapi-generator-ignore
-    git clone https://github.com/finbourne/RestSharp.git ./generate/.output/sdk/RestSharp
+    git clone git@gitlab.com:finbourne/ctools/sdk-core.git ./generate/.output/sdk/RestSharp
     rm -rf ./generate/.output/sdk/RestSharp/.git
 
     # split the README into two, and move one up a level

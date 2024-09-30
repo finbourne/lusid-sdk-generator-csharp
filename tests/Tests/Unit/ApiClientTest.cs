@@ -38,7 +38,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(req.RequestUri!.AbsolutePath ?? "oops")
                 });
-            Func<RestClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
+            Func<ClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
             var apiClient = new ApiClient("http://example.com", CreateHttpMessageHandler : HttpClientFactoryMock);
             var requestOptions = new RequestOptions(){
                 Operation = "GET",
@@ -66,7 +66,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(req.RequestUri!.AbsolutePath ?? "oops")
                 });
-            Func<RestClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
+            Func<ClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
             var apiClient = new ApiClient("http://example.com", CreateHttpMessageHandler : HttpClientFactoryMock);
             var requestOptions = new RequestOptions(){
                 Operation = "GET",

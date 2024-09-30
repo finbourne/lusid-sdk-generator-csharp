@@ -33,7 +33,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     {{/useGenericHost}}
       {{#useRestSharp}}
-    <ProjectReference Include="..\RestSharp\src\RestSharp\RestSharp.csproj" />
+    {{! <ProjectReference Include="..\RestSharp\src\RestSharp\RestSharp.csproj" /> }}
+    <PackageReference Include="RestSharp" Version="112.0.0" />
       {{/useRestSharp}}
       {{#useGenericHost}}
     <PackageReference Include="Microsoft.Extensions.Http" Version="{{^netStandard}}7.0.0{{/netStandard}}{{#netStandard}}5.0.0{{/netStandard}}" />

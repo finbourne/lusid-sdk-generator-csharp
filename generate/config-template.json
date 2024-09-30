@@ -49,6 +49,10 @@
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "ClientCredentialsFlowTokenProvider.cs"
     },
+    "other/ClientOptions.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "ClientOptions.cs"
+    },
     "other/ConfigurationException.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "ConfigurationException.cs"
@@ -65,6 +69,14 @@
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "ExceptionHandler.cs"
     },
+    "other/Header.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "Header.cs"
+    },
+    "other/HttpMethod.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "HttpMethod.cs"
+    },
     "other/PersonalAccessTokenProvider.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "PersonalAccessTokenProvider.cs"
@@ -76,6 +88,18 @@
     "other/PropertyBasedConverter.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
       "destinationFilename": "PropertyBasedConverter.cs"
+    },
+    "other/Request.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "Request.cs"
+    },
+    "other/Response.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "Response.cs"
+    },
+    "other/RestSharpExtensions.mustache": {
+      "folder": "${PROJECT_NAME}/Client",
+      "destinationFilename": "RestSharpExtensions.cs"
     },
     "other/TokenProviderConfiguration.mustache": {
       "folder": "${PROJECT_NAME}/Extensions",
