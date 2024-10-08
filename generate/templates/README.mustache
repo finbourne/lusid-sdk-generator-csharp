@@ -83,7 +83,7 @@ FBN_RATE_LIMIT_RETRIES
 
 ### Secrets file
 
-The secrets file must be in the current working directory.
+The secrets file must be in the current working directory. By default the SDK looks for a secrets file called `secrets.json`
 
 Required for a short-lived access token
 ```json
