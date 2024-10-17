@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using TO_BE_REPLACED_PROJECT_NAME.Api;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using NUnit.Framework;
 
 // this is necessary due to the name conflict in the Configurations sdk

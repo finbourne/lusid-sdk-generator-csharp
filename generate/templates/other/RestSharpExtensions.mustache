@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 
 namespace {{packageName}}.Client;
 
@@ -26,10 +26,10 @@ internal static class RestSharpExtensions
         };
         var requestFormat = request.RequestFormat switch
         {
-            DataFormat.Json => RestSharp.DataFormat.Json,
-            DataFormat.Xml => RestSharp.DataFormat.Xml,
-            DataFormat.Binary => RestSharp.DataFormat.Binary,
-            DataFormat.None => RestSharp.DataFormat.None,
+            DataFormat.Json => Finbourne.Sdk.Core.RestSharp.DataFormat.Json,
+            DataFormat.Xml => Finbourne.Sdk.Core.RestSharp.DataFormat.Xml,
+            DataFormat.Binary => Finbourne.Sdk.Core.RestSharp.DataFormat.Binary,
+            DataFormat.None => Finbourne.Sdk.Core.RestSharp.DataFormat.None,
             _ => throw new ArgumentOutOfRangeException(
                 nameof(request.RequestFormat), 
                 request.RequestFormat, 
@@ -73,7 +73,7 @@ internal static class RestSharpExtensions
         }
         foreach (var param in request.PathParameters)
         {
-            var segmentParameter = new UrlSegmentParameter(param.Key, param.Value);
+            var segmentParameter = new UrlSegmentParameter(param.Key, param.Value, replaceEncodedSlash: false);
             restRequest.AddParameter(segmentParameter);
         }
         foreach (var param in request.FormParameters)
@@ -111,10 +111,10 @@ internal static class RestSharpExtensions
         };
         var requestFormat = restRequest.RequestFormat switch
         {
-            RestSharp.DataFormat.Json => DataFormat.Json,
-            RestSharp.DataFormat.Xml => DataFormat.Xml,
-            RestSharp.DataFormat.Binary => DataFormat.Binary,
-            RestSharp.DataFormat.None => DataFormat.None,
+            Finbourne.Sdk.Core.RestSharp.DataFormat.Json => DataFormat.Json,
+            Finbourne.Sdk.Core.RestSharp.DataFormat.Xml => DataFormat.Xml,
+            Finbourne.Sdk.Core.RestSharp.DataFormat.Binary => DataFormat.Binary,
+            Finbourne.Sdk.Core.RestSharp.DataFormat.None => DataFormat.None,
             _ => throw new ArgumentOutOfRangeException(
                 nameof(restRequest.RequestFormat),
                 restRequest.RequestFormat,
@@ -170,11 +170,11 @@ internal static class RestSharpExtensions
             Headers = GetHeadersFromRestResponse(restResponse),
             ResponseStatus = restResponse.ResponseStatus switch
             {
-                RestSharp.ResponseStatus.None => ResponseStatus.None,
-                RestSharp.ResponseStatus.Completed => ResponseStatus.Completed,
-                RestSharp.ResponseStatus.Error => ResponseStatus.Error,
-                RestSharp.ResponseStatus.TimedOut => ResponseStatus.TimedOut,
-                RestSharp.ResponseStatus.Aborted => ResponseStatus.Aborted,
+                Finbourne.Sdk.Core.RestSharp.ResponseStatus.None => ResponseStatus.None,
+                Finbourne.Sdk.Core.RestSharp.ResponseStatus.Completed => ResponseStatus.Completed,
+                Finbourne.Sdk.Core.RestSharp.ResponseStatus.Error => ResponseStatus.Error,
+                Finbourne.Sdk.Core.RestSharp.ResponseStatus.TimedOut => ResponseStatus.TimedOut,
+                Finbourne.Sdk.Core.RestSharp.ResponseStatus.Aborted => ResponseStatus.Aborted,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(restResponse.ResponseStatus), 
                     restResponse.ResponseStatus, 
@@ -186,7 +186,7 @@ internal static class RestSharpExtensions
         };
     }
 
-    // In RestSharp the headers and content headers are separated. Merge them back into a single collection
+    // In Finbourne.Sdk.Core.RestSharp the headers and content headers are separated. Merge them back into a single collection
     private static List<Header> GetHeadersFromRestResponse<T>(RestResponse<T> restResponse)
     {
         var headers = restResponse.Headers?.Select(x => new Header(x.Name, x.Value)).ToList() ?? new List<Header>();

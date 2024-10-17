@@ -6,7 +6,7 @@ using System.Net.Http;
 using Moq;
 using Moq.Protected;
 using System.Net;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using System.Collections.Generic;
 using System.Text;
 

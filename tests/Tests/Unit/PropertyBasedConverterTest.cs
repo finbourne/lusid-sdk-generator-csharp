@@ -17,10 +17,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 }
                 ";
 
-            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new JsonConverter[]
-            {
-                new PropertyBasedConverter(),
-            });
+            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new PropertyBasedConverter());
 
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj.Keys, Is.Empty);
@@ -36,10 +33,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 }
                 ";
 
-            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new JsonConverter[]
-            {
-                new PropertyBasedConverter(),
-            });
+            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new PropertyBasedConverter());
 
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj.StringValue, Is.EqualTo("foo"));
@@ -55,10 +49,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 }
                 ";
 
-            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new JsonConverter[]
-            {
-                new PropertyBasedConverter(),
-            });
+            var obj = JsonConvert.DeserializeObject<SimpleObject>(json, new PropertyBasedConverter());
 
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj.StringValue, Is.EqualTo("foo"));
@@ -93,10 +84,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 }
                 ";
 
-            var obj = JsonConvert.DeserializeObject<ComplexFieldsObject>(json, new JsonConverter[]
-            {
-                new PropertyBasedConverter(),
-            });
+            var obj = JsonConvert.DeserializeObject<ComplexFieldsObject>(json, new PropertyBasedConverter());
 
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj.StringValue, Is.EqualTo("foo"));
@@ -127,10 +115,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                 }
                 ";
 
-            var obj = JsonConvert.DeserializeObject<PartialObject>(json, new JsonConverter[]
-            {
-                new PropertyBasedConverter(),
-            });
+            var obj = JsonConvert.DeserializeObject<PartialObject>(json, new PropertyBasedConverter());
 
             Assert.That(obj, Is.Not.Null);
             Assert.That(obj.StringValue, Is.EqualTo("foo"));

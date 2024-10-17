@@ -19,6 +19,7 @@
   "caseInsensitiveResponseHeaders": true,
   "packageTags": "FINBOURNE, LUSID, SDK",
   "excludeTests": ${EXCLUDE_TESTS},
+  "finbourneSdkCoreVersion": "${SDK_CORE_VERSION}",
   "optionalEmitDefaultValues": false,
   "files": {
     "other/ApiConfiguration.mustache": {

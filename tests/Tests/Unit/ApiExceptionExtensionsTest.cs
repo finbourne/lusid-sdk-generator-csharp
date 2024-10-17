@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
 using System.Net;
+using TO_BE_REPLACED_PROJECT_NAME.Model;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit
 {

@@ -36,6 +36,7 @@ export GIT_REPO_NAME              := `echo ${GIT_REPO_NAME:-}`
 export TEST_API                   := `echo ${TEST_API:-ApplicationMetadataApi}`
 export TEST_METHOD                := `echo ${TEST_METHOD:-'ListAccessControlledResources('}`
 export ASYNC_TEST_METHOD          := `echo ${ASYNC_TEST_METHOD:-'ListAccessControlledResourcesAsync('}`
+export SDK_CORE_VERSION           := `echo ${SDK_CORE_VERSION:-0.0.13-alpha.1}`
 
 swagger_path := "./swagger.json"
 
@@ -155,6 +156,8 @@ generate-and-publish-cicd OUT_DIR:
     @just publish-cicd {{OUT_DIR}}
 
 add-tests SDK_DIR:
+    mkdir -p {{SDK_DIR}}/sdk/Tests
+    cp {{swagger_path}} {{SDK_DIR}}/sdk/Tests/
     bash tests/add-tests.sh {{SDK_DIR}}
 
 test-cicd SDK_DIR:
@@ -175,7 +178,7 @@ test-local:
         FBN_CONFIGURATION_URL=${FBN_BASE_URL}/configuration \
         FBN_WORKFLOW_URL=${FBN_BASE_URL}/workflow \
         FBN_HORIZON_URL=${FBN_BASE_URL}/horizon \
-        bash tests/run-tests.sh generate/.output/sdk "${PROJECT_NAME}/${PROJECT_NAME}.csproj"
+        bash tests/run-tests.sh generate/.output/sdk "${PROJECT_NAME}/${PROJECT_NAME}.csproj" --filter WireMockTests
 
 test-local-docker:
     @just generate-local

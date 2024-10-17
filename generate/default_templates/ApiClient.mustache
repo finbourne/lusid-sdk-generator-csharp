@@ -16,11 +16,11 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json;
 {{#netStandard}}
-using RestSharp.Portable;
-using RestSharp.Portable.HttpClient;
+using Finbourne.Sdk.Core.RestSharp.Portable;
+using Finbourne.Sdk.Core.RestSharp.Portable.HttpClient;
 {{/netStandard}}
 {{^netStandard}}
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 {{/netStandard}}
 
 namespace {{packageName}}.Client
