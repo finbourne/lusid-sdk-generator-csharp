@@ -14,8 +14,8 @@ using System.Web;
 {{/netStandard}}
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using RestSharp;
-using RestSharp.Serializers;
+using Finbourne.Sdk.Core.RestSharp;
+using Finbourne.Sdk.Core.RestSharp.Serializers;
 {{#supportsRetry}}
 using Polly;
 {{/supportsRetry}}
@@ -28,7 +28,7 @@ using {{packageName}}.Extensions;
 namespace {{packageName}}.Client
 {
     /// <summary>
-    /// Allows RestSharp to Serialize/Deserialize JSON using our custom logic, but only when ContentType is JSON.
+    /// Allows Finbourne.Sdk.Core.RestSharp to Serialize/Deserialize JSON using our custom logic, but only when ContentType is JSON.
     /// </summary>
     internal class CustomJsonCodec : IRestSerializer, ISerializer, IDeserializer
     {
@@ -167,7 +167,7 @@ namespace {{packageName}}.Client
             set { throw new InvalidOperationException("Not allowed to set content type."); }
         }
         
-        public RestSharp.DataFormat DataFormat => RestSharp.DataFormat.Json;
+        public Finbourne.Sdk.Core.RestSharp.DataFormat DataFormat => Finbourne.Sdk.Core.RestSharp.DataFormat.Json;
     }
 
     /// <summary>
@@ -191,7 +191,7 @@ namespace {{packageName}}.Client
     /// </summary>
     internal class RestClientWrapper : RestClient, IClient
     {
-        private class RestSharpAuthenticator : RestSharp.Authenticators.IAuthenticator
+        private class RestSharpAuthenticator : Finbourne.Sdk.Core.RestSharp.Authenticators.IAuthenticator
         {
             private readonly OAuthAuthenticator _authenticator;
 
@@ -326,9 +326,9 @@ namespace {{packageName}}.Client
 
 
         /// <summary>
-        /// Provides all logic for constructing a new RestSharp <see cref="RestRequest"/>.
+        /// Provides all logic for constructing a new Finbourne.Sdk.Core.RestSharp <see cref="RestRequest"/>.
         /// At this point, all information for querying the service is known. Here, it is simply
-        /// mapped into the RestSharp request.
+        /// mapped into the Finbourne.Sdk.Core.RestSharp request.
         /// </summary>
         /// <param name="method">The http verb.</param>
         /// <param name="path">The target path (or resource).</param>

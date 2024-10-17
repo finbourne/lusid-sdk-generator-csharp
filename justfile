@@ -36,6 +36,7 @@ export GIT_REPO_NAME              := `echo ${GIT_REPO_NAME:-}`
 export TEST_API                   := `echo ${TEST_API:-ApplicationMetadataApi}`
 export TEST_METHOD                := `echo ${TEST_METHOD:-'ListAccessControlledResources('}`
 export ASYNC_TEST_METHOD          := `echo ${ASYNC_TEST_METHOD:-'ListAccessControlledResourcesAsync('}`
+export SDK_CORE_VERSION           := `echo ${SDK_CORE_VERSION:-0.0.13-alpha.1}`
 
 swagger_path := "./swagger.json"
 

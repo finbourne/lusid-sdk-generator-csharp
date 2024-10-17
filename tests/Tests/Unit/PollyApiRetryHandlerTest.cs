@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using NUnit.Framework;
 using Polly;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using SdkConfiguration = TO_BE_REPLACED_PROJECT_NAME.Client.Configuration;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit

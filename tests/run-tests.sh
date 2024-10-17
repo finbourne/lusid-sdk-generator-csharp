@@ -15,7 +15,6 @@ cat > "$dir/Tests/Usings.cs" <<EOF
 global using ${PROJECT_NAME};
 global using Client = ${PROJECT_NAME}.Client;
 global using ${PROJECT_NAME}.Client;
-global using ${PROJECT_NAME}.Model;
 global using ${PROJECT_NAME}.Extensions;
 EOF
 
