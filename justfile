@@ -36,6 +36,7 @@ export GIT_REPO_NAME              := `echo ${GIT_REPO_NAME:-}`
 export TEST_API                   := `echo ${TEST_API:-ApplicationMetadataApi}`
 export TEST_METHOD                := `echo ${TEST_METHOD:-'ListAccessControlledResources('}`
 export ASYNC_TEST_METHOD          := `echo ${ASYNC_TEST_METHOD:-'ListAccessControlledResourcesAsync('}`
+export SDK_CORE_VERSION           := `echo ${SDK_CORE_VERSION:-0.0.13-alpha.1}`
 
 swagger_path := "./swagger.json"
 
@@ -50,7 +51,7 @@ build-docker-images:
 
 generate-local:
     envsubst < generate/config-template.json > generate/.config.json
-    rm -r generate/.output || true
+    rm -rf generate/.output || true
     cp generate/templates/description.{{APPLICATION_SHORT_NAME}}.mustache generate/templates/description.mustache
     docker run \
         -e JAVA_OPTS="-Dlog.level=error" \
@@ -70,6 +71,9 @@ generate-local:
     
     # split the README into two, and move one up a level
     bash generate/split-readme.sh
+
+    # clone the RestSharp fork into the solution
+    # git clone git@gitlab.com:finbourne/ctools/sdk-core.git generate/.output/sdk/RestSharp
     
 generate TARGET_DIR:
     @just generate-local
@@ -91,6 +95,8 @@ generate-cicd TARGET_DIR:
 
     ./generate/generate.sh ./generate ./generate/.output {{swagger_path}} .config.json
     rm -f generate/.output/.openapi-generator-ignore
+    git clone git@gitlab.com:finbourne/ctools/sdk-core.git ./generate/.output/sdk/RestSharp
+    rm -rf ./generate/.output/sdk/RestSharp/.git
 
     # split the README into two, and move one up a level
     bash generate/split-readme.sh
@@ -99,6 +105,7 @@ generate-cicd TARGET_DIR:
     # this prevents deleted content from hanging around indefinitely.
     rm -rf {{TARGET_DIR}}/sdk/${APPLICATION_NAME}
     rm -rf {{TARGET_DIR}}/sdk/docs
+    rm -rf {{TARGET_DIR}}/RestSharp
     
     cp -R generate/.output/. {{TARGET_DIR}}
     echo "copied output to {{TARGET_DIR}}"

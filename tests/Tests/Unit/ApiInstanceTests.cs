@@ -2,9 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
+using System.Threading.Tasks;
 using TO_BE_REPLACED_PROJECT_NAME.Api;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using NUnit.Framework;
+
 // this is necessary due to the name conflict in the Configurations sdk
 using SdkConfiguration = TO_BE_REPLACED_PROJECT_NAME.Client.Configuration;
 
@@ -12,38 +14,29 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit;
 
 public class ApiInstanceTests
 {
-    private class TestRestClient : RestClient, IRestClientWrapper
+    private class TestClient : IClient
     {
         private readonly HttpStatusCode _returnStatusCode;
-        public readonly List<RestRequest> Requests = new();
+        public readonly List<Request> Requests = new();
 
-        public TestRestClient(HttpStatusCode returnStatusCode)
+        public TestClient(HttpStatusCode returnStatusCode)
         {
             _returnStatusCode = returnStatusCode;
         }
 
-        public RestResponse WrappedExecute(RestRequest request)
+        public Response<T> Execute<T>(Request request)
         {
             Requests.Add(request);
-            return new RestResponse
+            return new Response<T>(request)
             {
                 StatusCode = _returnStatusCode,
             };
         }
 
-        public RestResponse<T> WrappedExecute<T>(RestRequest request)
+        public Task<Response<T>> ExecuteAsync<T>(Request request, CancellationToken cancellationToken = default)
         {
             Requests.Add(request);
-            return new RestResponse<T>(request)
-            {
-                StatusCode = _returnStatusCode,
-            };
-        }
-
-        public new System.Threading.Tasks.Task<RestResponse> ExecuteAsync(RestRequest request, CancellationToken cancellationToken = new CancellationToken())
-        {
-            Requests.Add(request);
-            return System.Threading.Tasks.Task.FromResult(new RestResponse(request)
+            return System.Threading.Tasks.Task.FromResult(new Response<T>(request)
             {
                 StatusCode = _returnStatusCode,
             });
@@ -54,7 +47,7 @@ public class ApiInstanceTests
     public void WhenNoTimeoutSet_DefaultTimeoutSetOnRequest()
     {
         // arrange
-        var testRestClient = new TestRestClient(HttpStatusCode.OK);
+        var testRestClient = new TestClient(HttpStatusCode.OK);
         var apiClient = GetApiClient(
             expectedRestClientTimeout: SdkConfiguration.DefaultTimeoutMs, 
             expectedConfigurationTimeout: SdkConfiguration.DefaultTimeoutMs, 
@@ -68,14 +61,15 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(SdkConfiguration.DefaultTimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(SdkConfiguration.DefaultTimeoutMs));
     }
 
     [Test]
     public void WhenTimeoutSetInConfiguration_TimeoutSetOnRequest()
     {
         // arrange
-        var testRestClient = new TestRestClient(HttpStatusCode.OK);
+        var testRestClient = new TestClient(HttpStatusCode.OK);
         var configuration = new SdkConfiguration
         {
             TimeoutMs = 10000
@@ -92,14 +86,15 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(configuration.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(configuration.TimeoutMs));
     }
 
     [Test]
     public void WhenTimeoutOverriddenOnSyncCall_TimeoutSetOnRequest()
     {
         // arrange
-        var testRestClient = new TestRestClient(HttpStatusCode.OK);
+        var testRestClient = new TestClient(HttpStatusCode.OK);
         var configuration = new SdkConfiguration
         {
             TimeoutMs = 10000
@@ -120,14 +115,15 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(opts.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(opts.TimeoutMs));
     }
     
     [Test]
     public async System.Threading.Tasks.Task WhenTimeoutOveriddenOnAsyncCall_TimeoutSetOnRequest()
     {
         // arrange
-        var testRestClient = new TestRestClient(HttpStatusCode.OK);
+        var testRestClient = new TestClient(HttpStatusCode.OK);
         var configuration = new SdkConfiguration
         {
             TimeoutMs = 10000
@@ -148,19 +144,21 @@ public class ApiInstanceTests
         // assert
         Assert.That(testRestClient.Requests.Count, Is.EqualTo(1));
         var request = testRestClient.Requests.Single();
-        Assert.That(request.Timeout, Is.EqualTo(opts.TimeoutMs));
+        Assert.That(request.Timeout.HasValue);
+        Assert.That(request.Timeout.Value.TotalMilliseconds, Is.EqualTo(opts.TimeoutMs));
     }
     
     private static ApiClient GetApiClient(
         int expectedRestClientTimeout, 
         int expectedConfigurationTimeout, 
-        TestRestClient testRestClient)
+        TestClient testClient)
     {
         var apiClient = new ApiClient("http://localhost", createRestClientFunc: (options, readableConfiguration) =>
         {
-            Assert.That(options.MaxTimeout, Is.EqualTo(expectedRestClientTimeout));
+            Assert.That(options.Timeout.HasValue);
+            Assert.That(options.Timeout.Value.TotalMilliseconds, Is.EqualTo(expectedRestClientTimeout));
             Assert.That(readableConfiguration.TimeoutMs, Is.EqualTo(expectedConfigurationTimeout));
-            return testRestClient;
+            return testClient;
         });
         return apiClient;
     }
@@ -187,7 +185,7 @@ public class ApiInstanceTests
     private static void VerifyRateLimitRetriesRespected(SdkConfiguration configuration, int expectedNumberOfRetries)
     {
         // arrange
-        var testRestClient = new TestRestClient(HttpStatusCode.TooManyRequests);
+        var testRestClient = new TestClient(HttpStatusCode.TooManyRequests);
         var apiClient = new ApiClient("http://localhost", createRestClientFunc: (options, readableConfiguration) =>
         {
             Assert.That(readableConfiguration.RateLimitRetries, Is.EqualTo(expectedNumberOfRetries));
