@@ -2,7 +2,7 @@ using System;
 using System.Net;
 using NUnit.Framework;
 using Polly;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using SdkConfiguration = TO_BE_REPLACED_PROJECT_NAME.Client.Configuration;
 
 namespace Finbourne.Sdk.Extensions.Tests.Unit
@@ -82,7 +82,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         {
             // act
             new ApiFactory(configuration ?? new SdkConfiguration());
-            Policy<RestResponse> policy = ApiClient.GetSyncPolicy(requestOptions ?? new RequestOptions());
+            Policy<ResponseBase> policy = ApiClient.GetSyncPolicy(requestOptions ?? new RequestOptions());
             
             // assert
             Assert.That(policy, Is.Not.Null);
@@ -90,7 +90,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var result = policy.ExecuteAndCapture(() =>
             {
                 timesCalled += 1;
-                return new RestResponse
+                return new Response<string>
                 {
                     StatusCode = statusCode
                 };
@@ -103,7 +103,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void SyncRequest_WhenRetryPolicyIsAlreadyAssigned_ExistingRetryPolicyIsUsed()
         {
             // arrange
-            var testPolicy = Policy.HandleResult<RestResponse>(response => true).Retry();
+            var testPolicy = Policy.HandleResult<ResponseBase>(response => true).Retry();
             RetryConfiguration.RetryPolicy = testPolicy;
             
             // act
@@ -118,12 +118,12 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void SyncRequest_RetryPolicyOverridesGetRetryPolicyFunc()
         {
             // arrange
-            var testPolicy1 = Policy.HandleResult<RestResponse>(_ => true).Retry();
-            var testPolicy2 = Policy.HandleResult<RestResponse>(_ => true).Retry();
+            var testPolicy1 = Policy.HandleResult<ResponseBase>(_ => true).Retry();
+            var testPolicy2 = Policy.HandleResult<ResponseBase>(_ => true).Retry();
 
             // when both these properties are set, AsyncRetryPolicy should take precedence
             RetryConfiguration.RetryPolicy = testPolicy1;
-            RetryConfiguration.GetRetryPolicyFunc = (Func<RequestOptions, Policy<RestResponse>>)(_ => testPolicy2);
+            RetryConfiguration.GetRetryPolicyFunc = (Func<RequestOptions, Policy<ResponseBase>>)(_ => testPolicy2);
 
             // act
             new ApiFactory(new SdkConfiguration());
@@ -137,8 +137,8 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void SyncRequest_WhenRetryPolicyNull_UsesGetRetryPolicyFunc()
         {
             // arrange
-            var testPolicy2 = Policy.HandleResult<RestResponse>(_ => true).Retry();
-            RetryConfiguration.GetRetryPolicyFunc = (Func<RequestOptions, Policy<RestResponse>>)(_ => testPolicy2);
+            var testPolicy2 = Policy.HandleResult<ResponseBase>(_ => true).Retry();
+            RetryConfiguration.GetRetryPolicyFunc = (Func<RequestOptions, Policy<ResponseBase>>)(_ => testPolicy2);
             
             // act
             new ApiFactory(new SdkConfiguration());
@@ -202,7 +202,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         {
             // act
             new ApiFactory(configuration ?? new SdkConfiguration());
-            AsyncPolicy<RestResponse> policy = ApiClient.GetAsyncPolicy(requestOptions ?? new RequestOptions());
+            AsyncPolicy<ResponseBase> policy = ApiClient.GetAsyncPolicy(requestOptions ?? new RequestOptions());
             
             // assert
             Assert.That(policy, Is.Not.Null);
@@ -210,7 +210,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
             var result = await policy.ExecuteAsync(() =>
             {
                 timesCalled += 1;
-                return System.Threading.Tasks.Task.FromResult(new RestResponse
+                return System.Threading.Tasks.Task.FromResult((ResponseBase)new Response<string>
                 {
                     StatusCode = statusCode
                 });
@@ -223,7 +223,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void AsyncRequest_WhenRetryPolicyIsAlreadyAssigned_ExistingAsyncRetryPolicyIsUsed()
         {
             // arrange
-            var testPolicy = Policy.HandleResult<RestResponse>(response => true).RetryAsync();
+            var testPolicy = Policy.HandleResult<ResponseBase>(response => true).RetryAsync();
             RetryConfiguration.AsyncRetryPolicy = testPolicy;
             
             // act
@@ -238,12 +238,12 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void AsyncRequest_AsyncRetryPolicyOverridesGetAsyncRetryPolicyFunc()
         {
             // arrange
-            var testPolicy1 = Policy.HandleResult<RestResponse>(_ => true).RetryAsync();
-            var testPolicy2 = Policy.HandleResult<RestResponse>(_ => true).RetryAsync();
+            var testPolicy1 = Policy.HandleResult<ResponseBase>(_ => true).RetryAsync();
+            var testPolicy2 = Policy.HandleResult<ResponseBase>(_ => true).RetryAsync();
 
             // when both these properties are set, AsyncRetryPolicy should take precedence
             RetryConfiguration.AsyncRetryPolicy = testPolicy1;
-            RetryConfiguration.GetAsyncRetryPolicyFunc = (Func<RequestOptions, AsyncPolicy<RestResponse>>)(_ => testPolicy2);
+            RetryConfiguration.GetAsyncRetryPolicyFunc = (Func<RequestOptions, AsyncPolicy<ResponseBase>>)(_ => testPolicy2);
 
             // act
             new ApiFactory(new SdkConfiguration());
@@ -257,8 +257,8 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
         public void AsyncRequest_WhenAsyncRetryPolicyNull_UsesGetAsyncRetryPolicyFunc()
         {
             // arrange
-            var testPolicy2 = Policy.HandleResult<RestResponse>(_ => true).RetryAsync();
-            RetryConfiguration.GetAsyncRetryPolicyFunc = (Func<RequestOptions, AsyncPolicy<RestResponse>>)(_ => testPolicy2);
+            var testPolicy2 = Policy.HandleResult<ResponseBase>(_ => true).RetryAsync();
+            RetryConfiguration.GetAsyncRetryPolicyFunc = (Func<RequestOptions, AsyncPolicy<ResponseBase>>)(_ => testPolicy2);
             
             // act
             new ApiFactory(new SdkConfiguration());

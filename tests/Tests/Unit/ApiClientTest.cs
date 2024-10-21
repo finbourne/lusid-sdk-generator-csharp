@@ -6,7 +6,7 @@ using System.Net.Http;
 using Moq;
 using Moq.Protected;
 using System.Net;
-using RestSharp;
+using Finbourne.Sdk.Core.RestSharp;
 using System.Collections.Generic;
 using System.Text;
 
@@ -38,7 +38,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(req.RequestUri!.AbsolutePath ?? "oops")
                 });
-            Func<RestClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
+            Func<ClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
             var apiClient = new ApiClient("http://example.com", CreateHttpMessageHandler : HttpClientFactoryMock);
             var requestOptions = new RequestOptions(){
                 Operation = "GET",
@@ -66,7 +66,7 @@ namespace Finbourne.Sdk.Extensions.Tests.Unit
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent(req.RequestUri!.AbsolutePath ?? "oops")
                 });
-            Func<RestClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
+            Func<ClientOptions, HttpMessageHandler> HttpClientFactoryMock = (options) => handler.Object;
             var apiClient = new ApiClient("http://example.com", CreateHttpMessageHandler : HttpClientFactoryMock);
             var requestOptions = new RequestOptions(){
                 Operation = "GET",
